@@ -1,21 +1,28 @@
 package Net::FTP::Backup;
 
+time > 1e5 or die 'your system clock must not be set';
+
 our $Location;
 
 use AppConfig qw(:argcount);
 use Data::Dumper;
 use Getopt::Long;
 use File::Find;
+use File::stat;
 use Net::FTP::Common;
 use strict;
 
 our $last_done;
-my ($since_last_run, $blind, $days_old);
+my ($since_last_run, $blind, $seconds_mtime);
 
-GetOptions('since-last-run' => \$since_last_run, 'blind'  => \$blind, 'days_old' => \$days_old) or die;
+# when file exists server-side, 
+# - check date?
+# - 
 
-my $sum = $since_last_run + $blind + $days_old;
-my @option_name = qw(since-last-run blind days-old);
+GetOptions('since-last-run' => \$since_last_run, 'blind'  => \$blind, 'seconds-mtime' => \$seconds_mtime) or die;
+
+my $sum = $since_last_run + $blind + $seconds_mtime;
+my @option_name = qw(since-last-run blind seconds-mtime);
 $sum == 1 or die "exactly one of @option_name must be specified";
 
 
@@ -50,7 +57,13 @@ warn Dumper($location, $install_dir);
 
 if ($since_last_run) {
   warn "calculating last_done on $done_file";
-  $last_done = (stat($done_file))[9];
+  my $tmp = stat($done_file);
+  $last_done = $tmp->mtime;
+} 
+
+if ($seconds_mtime) {
+   warn "calculating last_done from system time";
+  $last_done = time - $seconds_mtime;
 }
 
 
@@ -67,12 +80,14 @@ sub unwanted {
     return 1 if $file =~ /.DS_Store/;
     return 1 if $file =~ /.FBC/;
     return 1 if $file =~ /\.mp3$/;
-    my $mtime = (stat($file))[9];
-    if ($since_last_run) {
-      my $diff = $last_done - $mtime;
-      warn "$file\tlast_done - mtime: $diff";
-      return 1 unless $diff < 0;
-    }
+    my $tmp = stat($file);
+    my $mtime = $tmp->mtime;
+    warn "\tfile mtime: $mtime";
+    warn "\tlast done : $last_done";
+    my $diff = $last_done - $mtime;
+
+    warn "$file\tlast_done - mtime: $diff";
+    return 1 unless $diff < 0;
     return 0
 }
 
