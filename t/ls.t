@@ -58,11 +58,11 @@ ok("@host_listings", qr/winston/);
 # Test 4
 # Let's list several directories on the same host
 #
-$ez->Common(Host => 'ftp.ddj.com');
-my @dir_list = qw(/2000/2000_10 /2003/2003_07);
+$ez->Common(Host => 'lnc.usc.edu');
+my @dir_list = qw(/pub/room-images /pub/dlr);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
 warn "complete dir listing: @dir_listings";
-ok("@dir_listings", qr/disbuild/);
+ok("@dir_listings", qr/gen_seq/);
 
 

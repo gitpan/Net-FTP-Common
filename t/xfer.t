@@ -22,15 +22,15 @@ my $ez = Net::FTP::Common->new
 $ez->Common
   (
    Host => 'ftp.ddj.com',
-   RemoteDir  => '/2003/2003_07',
-   RemoteFile =>  'jelly.zip'
+   RemoteDir  => '/',
+   RemoteFile =>  'README'
   );
 
 
 #
 # Test 1
 #
-my $retval = $ez->get(LocalFile => 'localname.zip');
+my $retval = $ez->get(LocalFile => 'localname.test');
 ok($retval);
 
 #
