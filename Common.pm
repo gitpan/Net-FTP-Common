@@ -1,8 +1,7 @@
 package Net::FTP::Common;
 
-require 5.005_62;
 use strict;
-use warnings;
+
 
 require Exporter;
 
@@ -10,9 +9,11 @@ use Data::Dumper;
 use Net::FTP;
 
 
-our @ISA = qw(Net::FTP);
+use vars qw(@ISA $VERSION);
 
-our $VERSION = '0.01';
+@ISA = qw(Net::FTP);
+
+$VERSION = '1.2';
 
 
 # Preloaded methods go here.
@@ -50,7 +51,7 @@ sub login {
     Net::FTP->new($host, %{$self->{NetFTP}});
 
   if (!$ftp_session) {
-    warn "error connecting: $!";
+    warn "error connecting to $host: $!";
     return 0;
   }
 
@@ -97,12 +98,20 @@ sub check {
     scalar grep { $_ eq $cfg{File} } @listing;
 }
 
-sub check {
+sub glob {
     my ($self,$host,%cfg) = @_;
 
     my @listing = $self->dir($host);
 
     scalar grep { $_ =~ $cfg{File} } @listing;
+}
+
+sub grep {
+    my ($self,$host,%cfg) = @_;
+
+    my @listing = $self->dir($host);
+
+    grep { $_ =~ $cfg{File} } @listing;
 }
 
 # The Perl -e operator for files on a remote site. Even though the
@@ -196,6 +205,18 @@ sub get {
 
 }
 
+sub send {
+
+  my ($self,$host,%cfg) = @_;
+
+  warn Data::Dumper->Dump([$self,$host,\%cfg],['self','host','cfg']);
+
+  my $ftp = $self->prep($host);
+
+  $ftp->put($cfg{File}) || die "upload of $cfg{File} failed";
+
+}
+
 
 1;
 __END__
@@ -219,7 +240,7 @@ Net::FTP.
      );
 
 
-  $ez = Net::FTP::Common->new('ftp.rebol.com', \%net_ftp_config, \%common_cfg);
+  $ez = Net::FTP::Common->new(\%net_ftp_config, \%common_cfg);
 
   $host = 'ftp.rebol.com';
 
@@ -232,18 +253,22 @@ Net::FTP.
   # Get a file from the remote machine
   $ez->get($host, File => 'codex.txt');
 
-  # "grep" for a file on the remote machine (slash defaultusing eq)
+  # Send a file to the remote machine
+  $ez->send($host, File => 'codex.txt');
+
+  # test for a file's existence on the remote machine (slash defaultusing eq)
   $ez->grep($host, File => 'needed-file.txt');
 
-
-  # "grep" for a file on the remote machine (slash defaultusing eq)
+  # test for a file on the remote machine (using eq)
   $ez->check($host, File => 'needed-file.txt');
   # note this is no more than you manually calling:
   # (scalar grep { $_ = 'needed-file.txt' } $ez->dir($host)) > 0;
+  # or manually calling
+  # (scalar $ez->grep($host)) > 0
 
 
-  # "grep" for a file on the remote machine (using regexp)
-      		$ez->grep($host, File => 'n.*-file.t?t');
+  # test for a file on the remote machine (using =~)
+  $ez->glob($host, File => 'n.*-file.t?t');
   # note this is no more than you manually calling:
   # (scalar grep { $_ =~ 'n.*-file.t?t' } $ez->dir($host)) > 0;
 
@@ -254,8 +279,17 @@ Net::FTP.
 =head1 DESCRIPTION
 
 This module is intended to make the common uses of Net::FTP a one-line
-affair. It was developed to make the development of Net::FTP::Shell 
+affair. Also, it made the development of Net::FTP::Shell 
 straightfoward.
+
+Note well: though Net::FTP works in the stateful way that the FTP protocol 
+does, Net::FTP::Common works in a stateless "one-hit" fashion. That is, for
+each separate call to the API, a connection is established, the particular
+Net::FTP::Common functionality is performed and the connection is dropped.
+The disadvantage of this approach is the (usually irrelevant and 
+insignificant) over head of connection and disconnection. The
+advantage is that there is much less chance of incurring failure due
+to timeout.
 
 =head2 EXPORT
 
@@ -267,6 +301,9 @@ T. M. Brannon <tbone@cpan.org>
 
 =head1 SEE ALSO
 
-www.metaperl.com, www.rebol.com, Net::FTP (part of the libnet distribution)
+REBOL (www.metaperl.com) is a language which supports 1-line
+internet processing for the schemes of mailto:, http:, daytime:, and ftp:. 
+
+A Perl implementation of REBOL is in the works at www.metaperl.com.
 
 =cut
