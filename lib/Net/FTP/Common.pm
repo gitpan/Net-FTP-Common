@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2';
+$VERSION = '5.2a';
 
 # Preloaded methods go here.
 
@@ -829,6 +829,8 @@ net-ftp-common-subscribe@yahoogroups.com
 
 
 =over 4
+
+=item * adding a warning about any keys passed that are not recognised 
 
 =item * support resumeable downloads
 
