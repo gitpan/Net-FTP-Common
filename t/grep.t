@@ -30,6 +30,6 @@ ok("@retval","welcome.msg");
 #
 # Test 2
 #
-my $retval = $ez->exists(File => 'welcome.msg');
+my $retval = $ez->exists(RemoteFile => 'welcome.msg');
 ok($retval);
 

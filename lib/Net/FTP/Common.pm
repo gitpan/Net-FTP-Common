@@ -2,6 +2,7 @@ package Net::FTP::Common;
 
 use strict;
 
+use Carp qw(cluck confess);
 use Data::Dumper;
 use Net::FTP;
 
@@ -9,7 +10,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.9 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.10 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -27,7 +28,7 @@ sub new {
 
   my %netftp_cfg_default = ( Debug => 1, Timeout => 240 );
 
-  # overwrite defaults with values supplied by sub input
+  # overwrite defaults with values supplied by constructor input
   @common_cfg_default{keys %$common_cfg_in} = values %$common_cfg_in;
   @netftp_cfg_default{keys  %netftp_cfg_in} = values  %netftp_cfg_in;
     
@@ -52,7 +53,11 @@ sub GetCommon {
     my ($self,$key) = @_;
 
     if ($key) {
-	$self->{Common}{$key};
+	if (defined($self->{Common}{$key})) {
+	    return ($self->{Common}{$key});
+	} else {
+	    return undef;
+	}
     } else {
 	$self->{Common};
     }
@@ -62,9 +67,9 @@ sub Host { $_[0]->{Common}->{Host} or die "Host must be defined when creating a 
 
 sub NetFTP { 
 
-my ($self, %config) = @_;
+    my ($self, %config) = @_;
 
-@{$self}{keys %config} = values %config;
+    @{$self}{keys %config} = values %config;
 
 }
 
@@ -77,10 +82,12 @@ sub login {
   $ftp_session or return undef;
 
   my $session;
+  my $account = $self->GetCommon('Account');
   if ($self->GetCommon('User') and $self->GetCommon('Pass')) {
       $session = 
 	  $ftp_session->login($self->GetCommon('User') , 
-			      $self->GetCommon('Pass'));
+			      $self->GetCommon('Pass'),
+			      $account);
   } else {
       warn "either User or Pass was not defined. Attempting .netrc for login";
       $session = 
@@ -175,7 +182,11 @@ sub exists {
 
     my @listing = $self->ls(%cfg);
 
-    scalar grep { $_ eq $self->GetCommon('File') } @listing;
+    my $rf = $self->GetCommon('RemoteFile');
+
+    warn sprintf "checking @listing for %s", $rf;
+
+    scalar grep { $_ eq $self->GetCommon('RemoteFile') } @listing;
 }
 
 sub grep {
@@ -232,20 +243,39 @@ sub get {
 
   my $r;
 
-  my $file = $self->GetCommon('LocalFile') 
-      ? $self->GetCommon('LocalFile') : $self->GetCommon('File') ;
+  $ftp->hash;
+
+  my $file;
+  if ($self->GetCommon('LocalFile')) {
+      $file= $self->GetCommon('LocalFile');
+  } else {
+      $file=$self->GetCommon('RemoteFile');
+  }
+	
   my $local_file = join '/', ($self->GetCommon('LocalDir'), $file);
 		
 
-  if ($r = $ftp->get($self->GetCommon('File'), $local_file)) {
+  if ($r = $ftp->get($self->GetCommon('RemoteFile'), $local_file)) {
       return $r;
   } else { 
     warn sprintf "download of %s to %s failed",
-	  $self->GetCommon('File'), $self->GetCommon('LocalFile');
+	  $self->GetCommon('RemoteFile'), $self->GetCommon('LocalFile');
     return undef;
 }
+  
 
+}
 
+sub file_attr {
+    my $self = shift;
+    my %hash;
+    my @key = qw(LocalFile LocalDir RemoteFile RemoteDir);
+    @hash{@key} = @{$self->{Common}}{@key};
+    %hash;
+}
+
+sub bad_filename {
+    shift =~ /[\r\n]/s;
 }
 
 sub send {
@@ -253,9 +283,25 @@ sub send {
 
   my $ftp = $self->prep(%cfg);
 
-  $ftp->put($self->GetCommon('File')) or
-      die sprintf "upload of %s failed", $self->GetCommon('File');
+  my %fa = $self->file_attr;
+
+  if (bad_filename($fa{LocalFile})) {
+      warn "filenames may not have CRLF in them. skipping $fa{LocalFile}";
+      return;
+  }
+
+
+  use Data::Dumper;
+
+  my $lf = sprintf "%s/%s", $fa{LocalDir}, $fa{LocalFile};
+  my $RF = $fa{RemoteFile} ? $fa{RemoteFile} : $fa{LocalFile};
+  my $rf = sprintf "%s/%s", $fa{RemoteDir}, $RF;
+
+  $ftp->put($lf, $rf) or 
+      die sprintf "upload of %s to %s failed", $lf, $rf;
 }
+
+sub put { goto &send }
 
 
 1;
@@ -357,22 +403,22 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
 
   # Get a file from the remote machine
 
-  $ez->get(File => 'codex.txt', LocalFile => '/tmp/crypto.txt');
+  $ez->get(RemoteFile => 'codex.txt', LocalFile => '/tmp/crypto.txt');
 
   # Get a file from the remote machine, specifying dir:
-  $ez->get(File => 'codex.txt', LocalDir => '/tmp');
+  $ez->get(RemoteFile => 'codex.txt', LocalDir => '/tmp');
 
   # NOTE WELL:  because the prior call set LocalFile, it is still a
   # part of the object store. In other words this example will try
   # to store the downloaded file in /tmp/tmp/crypto.txt.
   # Better to say:
 
-  $ez->get(File => 'codex.txt', LocalDir => '/tmp', LocalFile => '');
+  $ez->get(RemoteFile => 'codex.txt', LocalDir => '/tmp', LocalFile => '');
 
 
   # Send a file to the remote machine (*dont* use put!)
 
-  $ez->send(File => 'codex.txt');
+  $ez->send(RemoteFile => 'codex.txt');
 
   # test for a file's existence on the remote machine (using =~)
 
@@ -381,12 +427,20 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
 
   # test for a file on the remote machine (using eq)
 
-  $ez->exists(File => 'needed-file.txt');
+  $ez->exists(RemoteFile => 'needed-file.txt');
 
   # note this is no more than you manually calling:
   # (scalar grep { $_ eq 'needed-file.txt' } $ez->ls) > 0;
 
 The test suite contains plenty of common examples.
+
+=head1 IMPORTANT API CHANGES
+
+=over 4
+
+=item File is now RemoteFile
+
+=back
 
 =head1 DESCRIPTION
 
@@ -605,12 +659,12 @@ Here is the results of the example from the the test suite (t/dir.t):
 Makes directories on remote FTP server. Will recurse if Recurse => 1 is
 in object's internal state of overridden at method call time. 
 
-Note this function has no test case. Good luck with it. Report any 
-difficulties please.
+This function has no test case but a working example of its use is in 
+C<scripts/rsync.pl>. I use it to back up my stuff.
 
 =head2 $ez->exists (%override)
 
-uses the C<File> option of object internal state (or override) to check for a
+uses the C<RemoteFile> option of object internal state (or override) to check for a
 file in a directory listing. This means a C<eq>, not regex match.
 
 =head2 $ez->grep(%override)
@@ -623,7 +677,7 @@ file in a directory listing. This means a regex, not C<eq> match.
 =head2 $ez->get(%override)
 
 
-uses the C<File>, C<LocalFile>, and C<LocalDir> options of object internal 
+uses the C<RemoteFile>, C<LocalFile>, and C<LocalDir> options of object internal 
 state 
 (or override) to download a file. No slashes need be appended to the end of
 C<LocalDir>. If C<LocalFile> and C<LocalDir> arent defined, then the file
@@ -676,6 +730,14 @@ warning is thrown by Net::FTP:
  (in cleanup) Not a GLOB reference at Net/FTP.pm line 147.
 
 This is a harmless error that I should fix some day.
+
+=item * parsing FTP list output
+
+This output is not standard. We did a fair job for most common Unixen, but
+if we aspire to the heights of an ange-ftp or other high-quality FTP
+client, we need something like they have in python:
+
+     http://freshmeat.net/redir/ftpparsemodule/20709/url_homepage/
 
 =back
 

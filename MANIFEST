@@ -1,8 +1,11 @@
 Changes
 MANIFEST
+TODO
 lib/Net/FTP/Common.pm
 lib/TestConfig.pm
 Makefile.PL
+release.sh
+scripts/rsync.pl
 t/0-login.t
 t/dir.t
 t/ls.t

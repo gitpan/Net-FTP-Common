@@ -23,7 +23,7 @@ $ez->Common
   (
    Host => 'ftp.microsoft.com',
    RemoteDir  => '/products/windows/windows95/cdromextras/funstuff',
-   File =>  'clouds.exe'
+   RemoteFile =>  'clouds.exe'
   );
 
 
