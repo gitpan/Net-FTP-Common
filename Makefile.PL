@@ -24,7 +24,8 @@ An even more final source is me, but I am not a Net::FTP expert,
 so don't expect miracles.
 
 But of course for any issues with Net::FTP::Common, contact me
-immediately please - tbone@cpan.org
+immediately please - tbone@cpan.org or through the mailing list:
+net-ftp-common@yahoogroups.com.
 
 Note: 'make test' will only work if you have correctly installed Net::FTP 
 to connect to FTP sites on the open internet.
@@ -41,10 +42,17 @@ Common reasons for Net::FTP being unable to make such FTP connections are
     * if you aren't currently connected to the internet.
 
 
-			     Installation
-			     ------------
+Installation
+------------
 1- make
 2- make test
 3- make install
+
+Mailing List
+------------
+Post message:net-ftp-common@yahoogroups.com
+Subscribe: net-ftp-common-subscribe@yahoogroups.com
+Unsubscribe: net-ftp-common-unsubscribe@yahoogroups.com
+List owner (moi): net-ftp-common-owner@yahoogroups.com    
 EOF
 

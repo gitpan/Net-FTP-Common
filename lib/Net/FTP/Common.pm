@@ -10,7 +10,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.11 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.13 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -44,7 +44,20 @@ sub new {
 
 sub Common {
     my $self = shift;
+
+    not (@_ % 2) or die 
+"
+Odd number of elements in assignment hash in call to Common().
+Common() is a 'setter' subroutine. You cannot call it with an
+odd number of arguments (e.g. $self->Common('Type') ) and 
+expect it to get a value. use GetCommon() for that.
+
+Here is what you passed in.
+", Dumper(\@_);
+
     my %tmp = @_;
+
+#    warn "HA: ", Dumper(\%tmp,\@_);
 
     @{$self->{Common}}{keys %tmp} = values %tmp;
 }
@@ -94,7 +107,7 @@ sub login {
 	  $ftp_session->login;
   }
 
-  $session and return $ftp_session 
+  $session and ($self->Common('FTPSession', $ftp_session)) and return $ftp_session 
       or 
 	  warn "error logging in: $!" and return undef;
 
@@ -103,7 +116,6 @@ sub login {
 sub ls {
   my ($self, @config) = @_;
   my %config=@config;
-
 
   my $ftp = $self->prep(%config);
 
@@ -132,7 +144,8 @@ sub dir {
     my %HoH;
     foreach (@{$dir})
         {
-        $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
+	    # $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
+	    $_ = m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([\w*\W*\s*\S*]*)#;
 
         my $perm = $1;
         my $inode = $2;
@@ -184,7 +197,7 @@ sub exists {
 
     my $rf = $self->GetCommon('RemoteFile');
 
-    warn sprintf "checking @listing for %s", $rf;
+    warn sprintf "[checking @listing for [%s]]", $rf;
 
     scalar grep { $_ eq $self->GetCommon('RemoteFile') } @listing;
 }
@@ -200,19 +213,34 @@ sub grep {
     grep { $_ =~ /$cfg{Grep}/ } @listing;
 }
 
+sub connected {
+    my $self = shift;
 
-# Really, the best abstraction would be:
-# ftp_download_all_with_hook where the hook in this case would be a
-# coderef that conditionally decrypts the downloaded file
-# Laziness now will lead to more work later I guess.
+#    warn "CONNECTED SELF ", Dumper($self);
+
+    my $session = $self->GetCommon('FTPSession') or return 0;
+
+    local $@;
+    my $pwd;
+    my $connected = $session->pwd ? 1 : 0;
+#    warn "connected: $connected RESP: $connected";
+    $connected;
+}
+
+sub prepped {
+    my $self = shift; 
+    my $prepped = $self->GetCommon('FTPSession') and $self->connected;
+#    warn "prepped: $prepped";
+    $prepped;
+}
 
 sub prep {
   my $self = shift;
   my %cfg  = @_;
 
   $self->Common(%cfg);
-  
-  my $ftp = $self->login;
+
+  my $ftp = $self->connected ? $self->GetCommon('FTPSession') : $self->login ;
   if ($self->{Common}->{RemoteDir}) {
       $ftp->cwd($self->GetCommon('RemoteDir'))
   } else {
@@ -242,8 +270,6 @@ sub get {
   my $ftp = $self->prep(%cfg);
 
   my $r;
-
-  $ftp->hash;
 
   my $file;
   if ($self->GetCommon('LocalFile')) {
@@ -283,6 +309,8 @@ sub send {
 
   my $ftp = $self->prep(%cfg);
 
+#  warn "send_self", Dumper($self);
+
   my %fa = $self->file_attr;
 
   if (bad_filename($fa{LocalFile})) {
@@ -290,18 +318,24 @@ sub send {
       return;
   }
 
-
-  use Data::Dumper;
+  warn "send_fa: ", Dumper(\%fa);
 
   my $lf = sprintf "%s/%s", $fa{LocalDir}, $fa{LocalFile};
   my $RF = $fa{RemoteFile} ? $fa{RemoteFile} : $fa{LocalFile};
   my $rf = sprintf "%s/%s", $fa{RemoteDir}, $RF;
 
-  $ftp->put($lf, $rf) or 
-      die sprintf "upload of %s to %s failed", $lf, $rf;
+  warn "[upload $lf as $rf]";
+
+  $ftp->put($lf, $RF) or 
+      confess sprintf "upload of %s to %s failed", $lf, $rf;
 }
 
 sub put { goto &send }
+
+sub DESTROY {
+
+
+}
 
 
 1;
@@ -434,13 +468,6 @@ Net::FTP::Common - simplify common usages of Net::FTP
 
 The test suite contains plenty of common examples.
 
-=head1 IMPORTANT API CHANGES
-
-=over 4
-
-=item File is now RemoteFile
-
-=back
 
 =head1 DESCRIPTION
 
@@ -571,8 +598,8 @@ You may give this function any number of configuration arguments to over-ride th
 Here is the results of the example from the the test suite (t/dir.t):
 
  my %retval = $ez->dir;
- use Data::Dumper;
- warn "NEW_DIR ...", Dumper(\%retval);
+
+# warn "NEW_DIR ...", Dumper(\%retval);
 
           'incoming' => {
                           'owner' => 'root',
@@ -714,22 +741,33 @@ supposed to.
 
 =over 4
 
+=item * A good example of Net::FTP::Common usage comes with your download:
+
+C<scripts/rsync.pl>
+
+Although this script
+requires AppConfig, Net::FTP::Common in general does not... but go get
+AppConfig anyway, it rocks the house.
+
 =item * A slide talk on Net::FTP::Common in HTML format is available at
 
   http://www.metaperl.com
 
-=item * big change from version after 2.30:
+=item * subscribe to the mailing list via
 
-C<Dir> has been changed to C<RemoteDir> to avoid confusion.
+net-ftp-common-subscribe@yahoogroups.com
 
-=item * on object destruction:
+=back
 
-When a Net::FTP::Common object is goes out of scope, the following
-warning is thrown by Net::FTP:
+=head1 TODO
 
- (in cleanup) Not a GLOB reference at Net/FTP.pm line 147.
+=head2 Definite
 
-This is a harmless error that I should fix some day.
+=head2 Musings
+
+=over 4
+
+=item * Cache directory listings?
 
 =item * parsing FTP list output
 
@@ -739,7 +777,18 @@ client, we need something like they have in python:
 
      http://freshmeat.net/redir/ftpparsemodule/20709/url_homepage/
 
+
 =back
+
+=head1 OTHER FTP OFFERINGS
+
+=over 4
+
+=item * http://lftp.yar.ru
+
+
+=back
+
 
 =head1 AUTHOR
 
