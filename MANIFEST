@@ -6,6 +6,7 @@ lib/TestConfig.pm
 Makefile.PL
 release.sh
 scripts/rsync.pl
+scripts/README
 t/0-login.t
 t/dir.t
 t/ls.t

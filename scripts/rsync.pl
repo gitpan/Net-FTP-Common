@@ -1,19 +1,24 @@
-use AppConfig;
+use AppConfig::Std;
 use Net::FTP::Common;
 use strict;
 
-my $config = AppConfig->new({CASE=>1});
+my $config = AppConfig::Std->new( { CASE=>1 } );
+
+my $site = 'urth_';
+$config->define("$site$_") for qw(User Pass Host RemoteDir Type);
 $config->file('/Users/metaperl/.appconfig');
-my %urth = $config->varlist('^urth_', 1);
+
+my %urth = $config->varlist("^$site", 1);
 
 use Data::Dumper;
-die Dumper(%urth);
 
 
 our %netftp_cfg =
     (Debug => 1, Timeout => 120);
 
 my $ez = Net::FTP::Common->new(\%urth, %netftp_cfg);
+
+
 
 use File::Find;
 

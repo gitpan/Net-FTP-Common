@@ -10,7 +10,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.10 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.11 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -309,7 +309,7 @@ __END__
 
 =head1 NAME
 
-Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
+Net::FTP::Common - simplify common usages of Net::FTP
 
 =head1 SYNOPSIS
 
