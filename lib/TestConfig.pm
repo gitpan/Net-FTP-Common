@@ -8,8 +8,8 @@ our %common_cfg =
      User => 'anonymous',           # overwrite anonymous USER default
      Host => 'ftp.fcc.gov',         # overwrite ftp.microsoft.com HOST default
      Pass => 'tbone@cpan.org',      # overwrite list@rebol.com PASS default
-     Dir  => '/',                   # overwrite slash DIR default
-     Type => 'A'                    # overwrite I (binary) TYPE default
+     RemoteDir  => '/',                   # overwrite slash DIR default
+     Type => 'I'                    # (binary) TYPE default
      );
 
 

@@ -24,7 +24,7 @@ An even more final source is me, but I am not a Net::FTP expert,
 so don't expect miracles.
 
 But of course for any issues with Net::FTP::Common, contact me
-immediately please - princepawn@yahoo.com
+immediately please - tbone@cpan.org
 
 Note: 'make test' will only work if you have correctly installed Net::FTP 
 to connect to FTP sites on the open internet.
@@ -35,7 +35,7 @@ fail.
 
 Common reasons for Net::FTP being unable to make such FTP connections are
 
-    * if ou are firewalled and have not configured Net::FTP to negotiate your
+    * if you are firewalled and have not configured Net::FTP to negotiate your
       type of firewall (it handles everyone I have ever encounted quite well).
 
     * if you aren't currently connected to the internet.

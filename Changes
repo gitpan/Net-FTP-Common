@@ -1,4 +1,10 @@
+2001-12-11  Terrence Brannon  <metaperl@localhost>
+
+	* Changed Dir option to RemoteDir to avoid confusion (v2.6)
+
 Revision history for Perl extension Net::FTP::Common.
+
+
 
 0.01  Tue Oct 10 09:15:32 2000
 	- original version; created by h2xs 1.20 with options

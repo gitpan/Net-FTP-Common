@@ -5,12 +5,11 @@ use strict;
 use Data::Dumper;
 use Net::FTP;
 
-
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION =   '2.3';
+$VERSION = sprintf '%s', q{$Revision: 2.7 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -22,7 +21,7 @@ sub new {
   my %common_cfg_default = 
     (
      Host => 'ftp.microsoft.com',
-     Dir  => '/pub',
+     RemoteDir  => '/pub',
      Type => 'I'
     );
 
@@ -114,7 +113,7 @@ sub mkdir {
 
     my $ftp = $self->prep(%config);
 
-    $ftp->mkdir($self->GetCommon('Dir'), $self->GetCommon('Recurse'));
+    $ftp->mkdir($self->GetCommon('RemoteDir'), $self->GetCommon('Recurse'));
 }
 
 # The Perl -e operator for files on a remote site. Even though the
@@ -153,10 +152,10 @@ sub prep {
   $self->Common(%cfg);
   
   my $ftp = $self->login;
-  if ($self->{Common}->{Dir}) {
-      $ftp->cwd($self->GetCommon('Dir'))
+  if ($self->{Common}->{RemoteDir}) {
+      $ftp->cwd($self->GetCommon('RemoteDir'))
   } else {
-      warn "Dir not configured. ftp->cwd will not work. certain Net::FTP usages will failed.";
+      warn "RemoteDir not configured. ftp->cwd will not work. certain Net::FTP usages will failed.";
   }
   $ftp->type($self->GetCommon('Type'));
 
@@ -237,7 +236,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
      LocalDir  => '/tmp/downloads'   # setup something for $ez->get
      LocalFile => 'delete.zip'       # setup something for $ez->get
      Host => 'ftp.fcc.gov',          # overwrite ftp.microsoft.com default
-     Dir  => '/',                    # overwrite slash DIR default
+     RemoteDir  => '/',                    # automatic CD on remote machine to RemoteDir
      Type => 'A'                     # overwrite I (binary) TYPE default
      );
 
@@ -258,7 +257,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
   # call-and-return semantics for this function are described
   # and justified below.
 
-  $ez->login || die "cant login: $@";
+  $ez->login or die "cant login: $@";
 
   # Get a listing of a remote directory 
  
@@ -267,7 +266,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
   # Let's list a different directory, over-riding and changing the
   # default directory
  
-  @listing =	$ez->dir(Dir => '/pub/rfcs'); 
+  @listing =	$ez->dir(RemoteDir => '/pub/rfcs'); 
 
   # Let's list the default dir on several hosts
  
@@ -275,7 +274,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
 
   # Let's get the listings of several directories
 
-  @dir_listings  = map { $ez->dir(Dir  => $_) } @dir_list;
+  @dir_listings  = map { $ez->dir(RemoteDir  => $_) } @dir_list;
 
   # Get a file from the remote machine
 
@@ -372,7 +371,7 @@ Here is all you would have to do to convert it to the Net::FTP::Common API:
            $common_cfg = { Host => 'some.host.name', 
 			   User => 'anonymous',
 			   Pass => 'me@here.there',
-			   Dir  => '/pub'
+			   RemoteDir  => '/pub'
 			   }	
 
            $ftp = Net::FTP::Common->new($common_cfg, Debug => 0);
@@ -423,7 +422,7 @@ example:
 
  my %dir;
  my @dir =qw (/tmp /pub /gnu);
- map { @{$dir{$_}} = $ftp->dir(Dir => $_ ) } @dir;
+ map { @{$dir{$_}} = $ftp->dir(RemoteDir => $_ ) } @dir;
 
 =head2 $ez->mkdir (%override)
 
@@ -466,6 +465,8 @@ All of the following have test cases and work:
 
 null is any Perl non-true value... 0, '', undef.
 
+=head2 $ez->send(%override)
+
 =head1 TRAPS FOR THE UNWARY
 
 =item *
@@ -481,6 +482,14 @@ supposed to.
 
 =head1 NOTES
 
+=over 4
+
+=item * big change from version after 2.30:
+
+C<Dir> has been changed to C<RemoteDir> to avoid confusion.
+
+=item * on object destruction:
+
 When a Net::FTP::Common object is goes out of scope, the following
 warning is thrown by Net::FTP:
 
@@ -488,16 +497,11 @@ warning is thrown by Net::FTP:
 
 This is a harmless method that I should fix some day.
 
+=back
 
 =head1 AUTHOR
 
 T. M. Brannon <tbone@cpan.org>
 
-=head1 SEE ALSO
-
-REBOL (www.rebol.com) is a language which supports 1-line
-internet processing for the schemes of mailto:, http:, daytime:, and ftp:. 
-
-A Perl implementation of REBOL is done but not uploaded to CPAN.
 
 =cut

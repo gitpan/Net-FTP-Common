@@ -30,14 +30,14 @@ ok("@retval", qr/welcome.msg/);
 #
 # Test 2
 #
-my @listing =   $ez->dir(Dir => '/pub');
+my @listing =   $ez->dir(RemoteDir => '/pub');
 ok("@listing", qr/index.html/);
 
 #
 # Test 3
 # Let's list the default dir on several hosts
 #
-$ez->Common(Dir => '/pub');
+$ez->Common(RemoteDir => '/pub');
 my @host_list = qw(ftp.fcc.gov ftp.fedworld.gov);
 my @host_listings = map { $ez->dir(Host => $_) } @host_list;
 
@@ -50,7 +50,7 @@ ok("@host_listings", qr/reference_tools/);
 #
 $ez->Common(Host => 'ftp.fedworld.gov');
 my @dir_list = qw(/pub/irs-99 /pub/irs-98);
-my @dir_listings = map { $ez->dir(Dir => $_) } @dir_list;
+my @dir_listings = map { $ez->dir(RemoteDir => $_) } @dir_list;
 
 ok("@dir_listings", qr/f5500.pdf/);
 

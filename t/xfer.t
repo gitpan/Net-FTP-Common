@@ -22,7 +22,7 @@ my $ez = Net::FTP::Common->new
 $ez->Common
   (
    Host => 'ftp.microsoft.com',
-   Dir  => '/products/windows/windows95/cdromextras/funstuff',
+   RemoteDir  => '/products/windows/windows95/cdromextras/funstuff',
    File =>  'clouds.exe'
   );
 
