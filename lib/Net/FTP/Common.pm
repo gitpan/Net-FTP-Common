@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.1';
+$VERSION = '5.2';
 
 # Preloaded methods go here.
 
@@ -50,6 +50,18 @@ sub new {
 
   bless $new_self, $pkg;
 }
+
+sub config_dump {
+  my $self = shift;
+  
+  sprintf '
+Here are the configuration parameters:
+-------------------------------------
+%s
+', Dumper($self);
+
+}
+
 
 sub Common {
     my $self = shift;
@@ -102,6 +114,18 @@ sub NetFTP {
 sub login {
   my ($self, %config) = @_;
 
+  shift;
+
+  if (@_ % 2) {
+    die sprintf "Do not confuse Net::FTP::Common's login() with Net::FTP's login()
+Net::FTP::Common's login() expects to be supplied a hash. 
+E.g. \$ez->login(Host => \$Host)
+
+It was called incorrectly (%s). Program terminating
+%s
+", (join ':', @_), $self->config_dump;
+  }
+
 #  my $ftp_session = Net::FTP->new($self->Host, %{$self->{NetFTP}});
   my $ftp_session = Net::FTP->new($self->Host, %$self);
 
@@ -110,7 +134,8 @@ sub login {
       die sprintf 'FATAL: attempt to create Net::FTP session on host %s failed.
 If you cannot figure out why, supply the configuration parameters when
 emailing the support email list.
-Here are configuration parameters: %s', $self->Host, Dumper($self);
+  %s', $self->Host, $self->config_dump;
+
 
   my $session;
   my $account = $self->GetCommon('Account');
@@ -770,6 +795,11 @@ is correct
 
 looks correct but is not because you did not name the argument as you are 
 supposed to.
+
+=item * 
+
+also note that the Net::FTP::Common login() function expects to be passed a
+hash, while the Net::FTP login() function expets to be passed a scalar.
 
 =head1 NOTES
 

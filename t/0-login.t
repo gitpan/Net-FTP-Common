@@ -22,5 +22,10 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
+
+#my $retval = $ez->login('call with one arg to see it fail')
+#also, alter TestConfig.pm so that it attempts to connect to a host
+#which does not exist
+
 my $retval = $ez->login;
 ok("$retval", qr/Net::FTP=GLOB/);

@@ -24,8 +24,8 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
-my @retval = $ez->ls;
-ok("@retval", "RCS site linux dist README index.html software README_ABOUT_BZ2_FILES scm");
+my @retval = sort $ez->ls;
+ok("@retval", "RCS README README_ABOUT_BZ2_FILES dist index.html linux ls-lR.gz scm site software");
 
 #
 # Test 2

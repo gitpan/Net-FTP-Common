@@ -6,7 +6,7 @@ our %netftp_cfg =
 our %common_cfg =    
     (
      User => 'anonymous',           # overwrite anonymous USER default
-     Host => 'ftp.k-r-nel.org',         # overwrite ftp.microsoft.com HOST default
+     Host => 'ftp.kernel.org',      # overwrite ftp.microsoft.com HOST default
      Pass => 'tbone@cpan.org',      # overwrite list@rebol.com PASS default
      RemoteDir  => '/pub',                   # overwrite slash DIR default
      Type => 'I'                    # (binary) TYPE default
