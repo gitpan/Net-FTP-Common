@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '4.0';
+$VERSION = '4.0a';
 
 # Preloaded methods go here.
 
@@ -819,6 +819,15 @@ client, we need something like they have in python:
 
 
 =back
+
+=head1 Net::FTP FAQ
+
+Because I end up fielding so many Net::FTP questions, I feel it best to start a
+small FAQ.
+
+=head2 Trapping fatal exceptions
+
+http://perlmonks.org/index.pl?node_id=317408
 
 =head1 SEE ALSO
 

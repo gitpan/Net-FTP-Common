@@ -400,9 +400,19 @@ TODO
 
                  http://freshmeat.net/redir/ftpparsemodule/20709/url_homepage/
 
-OTHER FTP OFFERINGS
+Net::FTP FAQ
+        Because I end up fielding so many Net::FTP questions, I feel it best
+        to start a small FAQ.
+
+  Trapping fatal exceptions
+        http://perlmonks.org/index.pl?node_id=317408
+
+SEE ALSO
+        *
         * http://lftp.yar.ru
         * Net::FTP::Recursive
+        * Net::FTP::blat
+        * Tie::FTP
 
 AUTHOR
         T. M. Brannon <tbone@cpan.org>
