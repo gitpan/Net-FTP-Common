@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Net::FTP);
 
-$VERSION = '1.4';
+$VERSION = '1.6';
 
 
 # Preloaded methods go here.
@@ -59,7 +59,6 @@ sub login {
     && return $ftp_session 
     || die "error logging in: $!";
 
-  return 0;
 }
 
 sub dir {
@@ -99,14 +98,17 @@ sub check {
 }
 
 sub glob {
+    warn Data::Dumper->Dump([\@_],['@_(glob)']);
     my ($self,$host,%cfg) = @_;
+
+    warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
 
     my @listing = $self->dir($host);
 
     grep { $_ =~ $cfg{File} } @listing;
 }
 
-sub grep { goto &glob }
+sub grep { warn Data::Dumper->Dump([\@_],['@_']); goto &glob }
 
 # The Perl -e operator for files on a remote site. Even though the
 # REBOL exists? word works on local files as well as URL's, Perl's does 
@@ -195,7 +197,7 @@ sub get {
 
   my $ftp = $self->prep($host);
 
-  $ftp->get($cfg{File}) || die "download of $cfg{File} failed";
+  $ftp->get($cfg{File},$cfg{LocalFile}) || die "download of $cfg{File} failed";
 
 }
 
@@ -230,7 +232,8 @@ Net::FTP.
     (
       User => 'username',          # overwrite anonymous user default
       Pass => 'password',          # overwrite list@rebol.com pass default
-      Dir  => 'pub'                # overwrite slash default
+      Dir  => 'pub',               # overwrite slash default
+      Type => 'A'                  # overwrite I (binary) default
      );
 
 
@@ -245,7 +248,7 @@ Net::FTP.
   $ez->mkdir($host, Dir => '/pub/newdir/1/2/3', Recurse => 1);
 
   # Get a file from the remote machine
-  $ez->get($host, File => 'codex.txt');
+  $ez->get($host, File => 'codex.txt', LocalFile => '/tmp/crypto.txt');
 
   # Send a file to the remote machine
   $ez->send($host, File => 'codex.txt');
@@ -260,7 +263,7 @@ Net::FTP.
   # note this is no more than you manually calling:
   # (scalar grep { $_ = 'needed-file.txt' } $ez->dir($host)) > 0;
   # or manually calling
-  # (scalar $ez->grep($host)) > 0
+  # (scalar $ez->grep($host, File => 'needed-file.txt')) > 0
 
 
 
@@ -283,6 +286,17 @@ insignificant) over head of connection and disconnection. The
 advantage is that there is much less chance of incurring failure due
 to timeout.
 
+=head2 TRAPS FOR THE UNWARY
+
+  @file = $ez->grep($host, File => '[A-M]*[.]txt');
+  
+is correct
+
+  @file = $ez->grep($host, '[A-M]*[.]txt');
+
+looks correct but is not because you did not name the argument as you are 
+supposed to.
+
 =head2 EXPORT
 
 None by default.
@@ -293,7 +307,7 @@ T. M. Brannon <tbone@cpan.org>
 
 =head1 SEE ALSO
 
-REBOL (www.metaperl.com) is a language which supports 1-line
+REBOL (www.rebol.com) is a language which supports 1-line
 internet processing for the schemes of mailto:, http:, daytime:, and ftp:. 
 
 A Perl implementation of REBOL is in the works at www.metaperl.com.
