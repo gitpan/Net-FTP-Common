@@ -18,7 +18,6 @@ SYNOPSIS
          # Other options
          #
 
-         LocalDir  => '/tmp/downloads'   # setup something for $ez->get
          LocalFile => 'delete.zip'       # setup something for $ez->get
          Host => 'ftp.fcc.gov',          # overwrite ftp.microsoft.com default
          RemoteDir  => '/',                    # automatic CD on remote machine to RemoteDir
@@ -155,8 +154,7 @@ DESCRIPTION
         site. This is the only time you will need the login() API method.
 
 METHODS
-  `$ez = Net::FTP::Common-'new($net_ftp_common_hashref, %net_ftp_hash)>
-
+  "$ez = Net::FTP::Common-"new($net_ftp_common_hashref, %net_ftp_hash)>
         This method takes initialization information for Net::FTP::Common as
         well as Net::FTP and returns a new Net::FTP::Common object. Though
         the calling convention may seem a bit inconsistent, it is actually
@@ -187,19 +185,16 @@ METHODS
                    $ftp->quit;
 
   $ez->Common(%config)
-
         This is hardly ever necessary to use in isolation as all public API
         methods will call this as their first step in processing your
         request. However, it is available should you wish to extend this
         module.
 
   $ez->GetCommon($config_key)
-
         Again, this is hardly ever necessary to use in isolation. However,
         it is available should you wish to extend this module.
 
   $ez->NetFTP(%netftp_config_overrides)
-
         This creates and returns a Net::FTP object. In this case, any
         overrides are shuttled onward to the Net::FTP object as opposed to
         the configuration of the Net::FTP::Common object.
@@ -208,17 +203,15 @@ METHODS
         calls.
 
   $ez->login(%override)
-
-        This logs into an FTP server. `%override' is optional. It relies on
-        2 Common configuration options, `User' and `Pass', which, if not
+        This logs into an FTP server. %override is optional. It relies on 2
+        Common configuration options, "User" and "Pass", which, if not
         present load to logging in via a .netrc file.
 
-        Normal login with `User' and `Pass' are tested. .netrc logins are
+        Normal login with "User" and "Pass" are tested. .netrc logins are
         not.
 
   $ez->ls (%override)
-
-        When given no arguments, `ls()' uses Common configuration
+        When given no arguments, "ls()" uses Common configuration
         information to login to the ftp site, change directory and transfer
         type and then return an array of directory contents. You may only
         call this routine in array context and unlike Net::FTP, it returns a
@@ -233,9 +226,10 @@ METHODS
          my @dir =qw (/tmp /pub /gnu);
          map { @{$dir{$_}} = $ftp->ls(RemoteDir => $_ ) } @dir;
 
-  $ez->dir (%override)
+  %retval = $ez->dir (%override)
+        this function returns a hash NOT an array
 
-        When given no arguments, `dir()' uses Common configuration
+        When given no arguments, "dir()" uses Common configuration
         information to login to the ftp site, change directory and transfer
         type and then return a hash of with detailed description of
         directory contents. You may only call this routine and expect a hash
@@ -331,32 +325,28 @@ METHODS
                              },
 
   $ez->mkdir (%override)
-
         Makes directories on remote FTP server. Will recurse if Recurse => 1
         is in object's internal state of overridden at method call time.
 
         This function has no test case but a working example of its use is
-        in `scripts/rsync.pl'. I use it to back up my stuff.
+        in "scripts/rsync.pl". I use it to back up my stuff.
 
   $ez->exists (%override)
-
-        uses the `RemoteFile' option of object internal state (or override)
-        to check for a file in a directory listing. This means a `eq', not
+        uses the "RemoteFile" option of object internal state (or override)
+        to check for a file in a directory listing. This means a "eq", not
         regex match.
 
   $ez->grep(%override)
-
-        uses the `Grep' option of object internal state (or override) to
+        uses the "Grep" option of object internal state (or override) to
         check for a file in a directory listing. This means a regex, not
-        `eq' match.
+        "eq" match.
 
   $ez->get(%override)
-
-        uses the `RemoteFile', `LocalFile', and `LocalDir' options of object
+        uses the "RemoteFile", "LocalFile", and "LocalDir" options of object
         internal state (or override) to download a file. No slashes need be
-        appended to the end of `LocalDir'. If `LocalFile' and `LocalDir'
+        appended to the end of "LocalDir". If "LocalFile" and "LocalDir"
         arent defined, then the file is written to the current directory.
-        `LocalDir' must exist: `Net::FTP::Common' will not create it for
+        "LocalDir" must exist: "Net::FTP::Common" will not create it for
         you.
 
         All of the following have test cases and work:
@@ -371,7 +361,6 @@ METHODS
         null is any Perl non-true value... 0, '', undef.
 
   $ez->send(%override)
-
 TRAPS FOR THE UNWARY
     *
           @file = $ez->grep(Grep => '[A-M]*[.]txt');
@@ -385,7 +374,7 @@ TRAPS FOR THE UNWARY
 
 NOTES
         * A good example of Net::FTP::Common usage comes with your download:
-            `scripts/rsync.pl'
+            "scripts/rsync.pl"
 
             Although this script requires AppConfig, Net::FTP::Common in
             general does not... but go get AppConfig anyway, it rocks the
@@ -399,10 +388,9 @@ NOTES
 
 TODO
   Definite
-
         * support resumeable downloads
-  Musings
 
+  Musings
         * Cache directory listings?
         * parsing FTP list output
             This output is not standard. We did a fair job for most common
@@ -414,6 +402,8 @@ TODO
 
 OTHER FTP OFFERINGS
         * http://lftp.yar.ru
+        * Net::FTP::Recursive
+
 AUTHOR
         T. M. Brannon <tbone@cpan.org>
 

@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '3.8';
+$VERSION = '3.9';
 
 # Preloaded methods go here.
 
@@ -616,7 +616,9 @@ example:
  my @dir =qw (/tmp /pub /gnu);
  map { @{$dir{$_}} = $ftp->ls(RemoteDir => $_ ) } @dir;
 
-=head2 $ez->dir (%override)
+=head2 %retval = $ez->dir (%override)
+
+B<this function returns a hash NOT an array>
 
 When given no arguments, C<dir()> uses Common configuration
 information to login to the ftp site, change directory and transfer
