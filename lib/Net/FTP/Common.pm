@@ -1,6 +1,5 @@
 package Net::FTP::Common;
 
-
 use strict;
 
 use Carp qw(cluck confess);
@@ -12,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.26 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.28 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -774,6 +773,13 @@ net-ftp-common-subscribe@yahoogroups.com
 =head1 TODO
 
 =head2 Definite
+
+
+=over 4
+
+=item * support resumeable downloads
+
+=back
 
 =head2 Musings
 

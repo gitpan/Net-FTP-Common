@@ -1,11 +1,21 @@
 use AppConfig qw(:argcount);
 use Data::Dumper;
 use File::Basename;
+use Getopt::Long;
 use Net::FTP::Common;
 use strict;
 
+
+my ($overwrite);
+GetOptions('overwrite=i' => \$overwrite) or die;
+defined ($overwrite) or die "must set overwrite to 1 or 0";
+
+
+
+
+
 my $lockfile = '/tmp/net-ftp-rsync-upload-files.lck';
-my $wanted = 'rsync-files-wanted.dat';
+my $wanted = 'files-wanted.done';
 my $upload_log = 'rsync-upload-files.dat';
 
 sub cleanup {
@@ -32,7 +42,7 @@ sub unwanted {
 
 sub remotedir {
     my $dir = shift;
-    $dir =~ s{Users/metaperl}{home/metaperl/rsync};
+    $dir =~ s{Users/metaperl}{home/metaperl/backup};
     $dir
 
 }
@@ -49,7 +59,7 @@ my $site   = 'urth_';
 $config->define("$site$_", { ARGCOUNT => ARGCOUNT_ONE  } ) 
     for qw(User Pass Host RemoteDir Type);
 
-$config->file($ENV{FTP_RSYNC});
+$config->file($ENV{NET_FTP_BACKUP});
 
 my %urth = $config->varlist("^$site", 1);
 

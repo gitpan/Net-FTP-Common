@@ -400,6 +400,7 @@ NOTES
 TODO
   Definite
 
+        * support resumeable downloads
   Musings
 
         * Cache directory listings?
