@@ -1,6 +1,7 @@
 package Net::FTP::Backup;
 
-time > 1e5 or die 'your system clock must not be set';
+our $Time = time;
+$Time > 1e5 or die 'your system clock must not be set';
 
 our $Location;
 
@@ -24,7 +25,6 @@ GetOptions('since-last-run' => \$since_last_run, 'blind'  => \$blind, 'seconds-m
 my $sum = $since_last_run + $blind + $seconds_mtime;
 my @option_name = qw(since-last-run blind seconds-mtime);
 $sum == 1 or die "exactly one of @option_name must be specified";
-
 
 my $lockfile = '/tmp/net-ftp-common-rsync-files.lck';
 
@@ -56,9 +56,9 @@ my $done_file = "$install_dir/files-wanted.done";
 warn Dumper($location, $install_dir);
 
 if ($since_last_run) {
-  warn "calculating last_done on $done_file";
   my $tmp = stat($done_file);
   $last_done = $tmp->mtime;
+  warn "last_done: $last_done";
 } 
 
 if ($seconds_mtime) {
@@ -66,10 +66,13 @@ if ($seconds_mtime) {
   $last_done = time - $seconds_mtime;
 }
 
+open RUNLOG, ">$done_file" or 
+  die "could not open $done_file: $!";
 
 
 
 foreach (@$location) {
+  warn "testing $_";
   $Location = $_;
   find(\&wanted, $_);
 }
@@ -80,14 +83,19 @@ sub unwanted {
     return 1 if $file =~ /.DS_Store/;
     return 1 if $file =~ /.FBC/;
     return 1 if $file =~ /\.mp3$/;
+
     my $tmp = stat($file);
     my $mtime = $tmp->mtime;
-    warn "\tfile mtime: $mtime";
-    warn "\tlast done : $last_done";
-    my $diff = $last_done - $mtime;
 
-    warn "$file\tlast_done - mtime: $diff";
-    return 1 unless $diff < 0;
+    if ($since_last_run) {
+
+      my $diff = $mtime - $last_done;
+
+      if ($diff > 0) {
+	warn "$file\tlast_done - mtime: $diff";
+	return 1 
+      }
+    }
     return 0
 }
 
@@ -95,7 +103,7 @@ sub wanted {
 
   last unless -f; 
 
-  if ($Location = '/Users/metaperl') {
+  if ($Location eq '/Users/metaperl') {
     # do not enter subdirs for home dir
     last unless $File::Find::dir eq $Location;
   }
@@ -106,13 +114,10 @@ sub wanted {
 
   last if unwanted($File::Find::name);
 
-  print $File::Find::name, $/;
+  print RUNLOG "$File::Find::name\n";
 
 }
 
 
-open RUNLOG, ">$install_dir/files-wanted.done" or 
-  die "could not open $install_dir/files-wanted.done: $!";
-print RUNLOG "complete.\n";
 close(RUNLOG);
 

@@ -6,6 +6,7 @@ lib/Net/FTP/Common.pm
 lib/TestConfig.pm
 Makefile.PL
 release
+samples/upload-sicilian.pl
 scripts/rsync-ftp/README
 scripts/rsync-ftp/USAGE.pod
 scripts/rsync-ftp/architecture.text

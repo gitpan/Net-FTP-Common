@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-perl Makefile.PL PREFIX=$PREFIX
+perl Makefile.PL PREFIX=$PERL
 rm *.tar.gz
 make docs
 make test
