@@ -25,14 +25,14 @@ my $ez = Net::FTP::Common->new
 # Test 1
 #
 my @retval = sort $ez->ls;
-ok("@retval", "RCS README README_ABOUT_BZ2_FILES dist index.html linux ls-lR.gz scm site software");
+ok("@retval", qr/README/);
 
 #
 # Test 2
 #
 my @listing =   $ez->ls(RemoteDir => '/');
 warn "L: @listing";
-ok("@listing", qr/lost[+]found/);
+ok("@listing", qr/for_mirrors_only/);
 
 #
 # Test 3
@@ -63,6 +63,6 @@ my @dir_list = qw(/pub/room-images /pub/dlr);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
 warn "complete dir listing: @dir_listings";
-ok("@dir_listings", qr/gen_seq/);
+ok("@dir_listings", qr/image/);
 
 

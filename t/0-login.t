@@ -27,5 +27,7 @@ my $ez = Net::FTP::Common->new
 #also, alter TestConfig.pm so that it attempts to connect to a host
 #which does not exist
 
+warn "Using version $Net::FTP::Common::VERSION";
+
 my $retval = $ez->login;
 ok("$retval", qr/Net::FTP=GLOB/);
