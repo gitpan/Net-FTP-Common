@@ -4,7 +4,7 @@ use Test;
 use Net::FTP::Common;
 use Data::Dumper;
 
-BEGIN { plan tests => 2 }
+BEGIN { plan tests => 1 }
 
 use TestConfig;
 
@@ -14,7 +14,7 @@ use TestConfig;
 keys %TestConfig::common_cfg;
 keys %TestConfig::netftp_cfg;
 
-warn Data::Dumper->Dump([\%TestConfig::common_cfg, \%TestConfig::netftp_cfg], [qw(common netftp)]);
+#warn Data::Dumper->Dump([\%TestConfig::common_cfg, \%TestConfig::netftp_cfg], [qw(common netftp)]);
 
 my $ez = Net::FTP::Common->new
   (\%TestConfig::common_cfg, %TestConfig::netftp_cfg);
@@ -22,13 +22,5 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
-my @retval = $ez->grep(Grep => qr/^wel/);
-ok("@retval","welcome.msg");
-
-
-#
-# Test 2
-#
-my $retval = $ez->exists(File => 'welcome.msg');
-ok($retval);
-
+my $retval = $ez->login;
+ok("$retval", qr/Net::FTP=GLOB/);

@@ -3,32 +3,48 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'		=> 'Net::FTP::Common',
-    'VERSION_FROM'	=> 'Common.pm', # finds $VERSION
+    'VERSION_FROM'	=> 'lib/Net/FTP/Common.pm', # finds $VERSION
     'PREREQ_PM'		=> { Net::FTP => 1 }, # e.g., Module::Name => 1.1
 );
 
-print(<<EOF);
+print(<<'EOF');
 			   Important Notes!
 			   ---------------
-Net::FTP::Common is built on top, and requires, Net::FTP.
+Net::FTP::Common is built on top of, and requires, Net::FTP.
 
 Net::FTP is available from the libnet distribution on CPAN.
 
 Please visit http://kobsearch.cpan.org or http://search.cpan.org
 to obtain libnet and install that before installing Net::FTP::Common.
 
-There is a mailing list at lists.perl.org that deals with Net::FTP and
+The libnet@lists.perl.org mailing list deals with Net::FTP and
 the people there are relatively helpful. Another source is
-comp.lang.perl.modules. But I would also be willing to help. However,
-I am not a Net::FTP expert, so don't expect miracles :)
+comp.lang.perl.modules. A final source is www.perlmonks.org. 
+An even more final source is me, but I am not a Net::FTP expert, 
+so don't expect miracles.
 
 But of course for any issues with Net::FTP::Common, contact me
-immediately please.
+immediately please - princepawn@yahoo.com
+
+Note: 'make test' will only work if you have correctly installed Net::FTP 
+to connect to FTP sites on the open internet.
+
+The test suite makes FTP connects to ftp.fcc.fov and fedworld.gov so if 
+your installation of Net::FTP cannot connect there, then this suite will
+fail.
+
+Common reasons for Net::FTP being unable to make such FTP connections are
+
+    * if ou are firewalled and have not configured Net::FTP to negotiate your
+      type of firewall (it handles everyone I have ever encounted quite well).
+
+    * if you aren't currently connected to the internet.
+
 
 			     Installation
 			     ------------
-make
-make test (if you have an internet connection right now)
-make install
+1- make
+2- make test
+3- make install
 EOF
 

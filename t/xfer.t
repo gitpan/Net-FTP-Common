@@ -4,25 +4,45 @@ use Test;
 use Net::FTP::Common;
 use Data::Dumper;
 
-BEGIN { plan tests => 1 }
+BEGIN { plan tests => 3 }
 
-my %net_ftp_cfg = (Debug => 1, Timeout => 120);
+use TestConfig;
 
-my %common_cfg =
-    (
-     User => 'anonymous',           # overwrite anonymous USER default
-     Host => 'lnc.usc.edu',       # overwrite ftp.microsoft.com HOST default
-     Pass => 'tbone@cpan.org',     # overwrite list@rebol.com PASS default
-     Dir  => '/pub/holt',   # overwrite slash DIR default
-     Type => 'A'                   # overwrite I (binary) TYPE default
-     );
+# fodder to eliminiate 
+# Name "TestConfig::netftp_cfg" used only once: possible typo 
+# red herring errors
+keys %TestConfig::common_cfg;
+keys %TestConfig::netftp_cfg;
 
-my $ez = Net::FTP::Common->new(\%common_cfg, %net_ftp_cfg);
+warn Data::Dumper->Dump([\%TestConfig::common_cfg, \%TestConfig::netftp_cfg], [qw(common netftp)]);
+
+my $ez = Net::FTP::Common->new
+  (\%TestConfig::common_cfg, %TestConfig::netftp_cfg);
+
+$ez->Common
+  (
+   Host => 'ftp.microsoft.com',
+   Dir  => '/products/windows/windows95/cdromextras/funstuff',
+   File =>  'clouds.exe'
+  );
 
 
 #
 # Test 1
 #
-my $retval = $ez->get(File => 'h5pp.tar.gz', LocalFile => 'dl.C');
+my $retval = $ez->get(LocalFile => 'localname.exe');
+ok($retval);
+
+#
+# Test 2
+#
+my $retval = $ez->get(LocalDir => 't/dldir');
+ok($retval);
+
+#
+# Test 3
+#
+$ez->Common(LocalFile => '');
+my $retval = $ez->get(LocalDir => 't/dldir');
 ok($retval);
 
