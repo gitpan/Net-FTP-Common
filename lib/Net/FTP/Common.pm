@@ -1,7 +1,6 @@
 package Net::FTP::Common;
 
 
-
 use strict;
 
 use Carp qw(cluck confess);
@@ -13,7 +12,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.25 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.26 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 

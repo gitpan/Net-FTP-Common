@@ -93,7 +93,9 @@ sub unwanted {
 
       if ($diff > 0) {
 	warn "$file\tlast_done - mtime: $diff";
-	return 1 
+	return 0 
+      } else {
+	return 1
       }
     }
     return 0
