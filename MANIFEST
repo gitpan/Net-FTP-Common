@@ -7,9 +7,10 @@ lib/TestConfig.pm
 Makefile.PL
 release
 scripts/rsync-ftp/README
+scripts/rsync-ftp/USAGE.pod
 scripts/rsync-ftp/architecture.text
-scripts/rsync-ftp/mmddyy.pl
 scripts/rsync-ftp/crontab-entry
+scripts/rsync-ftp/mmddyy.pl
 scripts/rsync-ftp/rsync-files-wanted.pl
 scripts/rsync-ftp/rsync-upload-files.pl
 t/0-login.t
