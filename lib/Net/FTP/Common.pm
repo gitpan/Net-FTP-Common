@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '3.2';
+$VERSION = '3.3';
 
 # Preloaded methods go here.
 
@@ -85,7 +85,11 @@ sub GetCommon {
     }
 }
 
-sub Host { $_[0]->{Common}->{Host} or die "Host must be defined when creating a __PACKAGE__ object" }
+sub Host { 
+    $_[0]->{Common}->{Host}
+
+      or die "Host must be defined when creating a __PACKAGE__ object"
+}
 
 sub NetFTP { 
 
@@ -120,9 +124,10 @@ Most likely reason for this is lack of internet connectivity.
 	  $ftp_session->login;
   }
 
-  $session and ($self->Common('FTPSession', $ftp_session)) and return $ftp_session 
+  $session and ($self->Common('FTPSession', $ftp_session)) 
+    and return $ftp_session 
       or 
-	  warn "error logging in: $!" and return undef;
+	warn "error logging in: $!" and return undef;
 
 }
 
@@ -158,7 +163,7 @@ sub dir {
     foreach (@{$dir})
         {
 	    # $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
-	    $_ = m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([\w*\W*\s*\S*]*)#;
+	      $_ = m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([\w*\W*\s*\S*]*)#;
 
         my $perm = $1;
         my $inode = $2;
@@ -254,10 +259,12 @@ sub prep {
 
   $self->Common(%cfg);
 
-# This will not work if the Host changes and you are still connected to the prior host.
-# It might be wise to simply drop connection if the Host key changes, but I don't think
-# I will go there right now.
-#  my $ftp = $self->connected ? $self->GetCommon('FTPSession') : $self->login ;
+# This will not work if the Host changes and you are still connected 
+# to the prior host. It might be wise to simply drop connection 
+# if the Host key changes, but I don't think I will go there right now.
+#  my $ftp = $self->connected 
+#                  ? $self->GetCommon('FTPSession') 
+#                  : $self->login ;
 # So instead:
   my $ftp = $self->login ;
 
@@ -813,6 +820,7 @@ client, we need something like they have in python:
 
 =item * http://lftp.yar.ru
 
+=item * L<Net::FTP::Recursive|Net::FTP::Recursive>
 
 =back
 
