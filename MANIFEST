@@ -1,12 +1,15 @@
 Changes
 MANIFEST
+README
 TODO
 lib/Net/FTP/Common.pm
 lib/TestConfig.pm
 Makefile.PL
 release.sh
-scripts/rsync.pl
-scripts/README
+scripts/rsync-ftp/README
+scripts/rsync-ftp/mmddyy.pl
+scripts/rsync-ftp/crontab-entry
+scripts/rsync-ftp/rsync.pl
 t/0-login.t
 t/dir.t
 t/ls.t

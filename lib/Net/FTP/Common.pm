@@ -10,7 +10,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.13 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.14 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -38,6 +38,13 @@ sub new {
   @{$self          }{keys %netftp_cfg_default} = values %netftp_cfg_default;
 
   my $new_self = { %$self, Common => $self->{Common} } ;
+
+  if (my $file = $self->{Common}{STDERR}) {
+      open DUP, ">$file" or die "cannot dup STDERR to $file: $!";
+      lstat DUP; # kill used only once error
+      open STDERR, ">&DUP";
+  }
+
 
   bless $new_self, $pkg;
 }
@@ -92,7 +99,11 @@ sub login {
 #  my $ftp_session = Net::FTP->new($self->Host, %{$self->{NetFTP}});
   my $ftp_session = Net::FTP->new($self->Host, %$self);
 
-  $ftp_session or return undef;
+#  $ftp_session or return undef;
+  $ftp_session or 
+      die 'FATAL: attempt to create Net::FTP session failed.
+Most likely reason for this is lack of internet connectivity.
+';
 
   my $session;
   my $account = $self->GetCommon('Account');
@@ -182,8 +193,9 @@ sub mkdir {
     my ($self,%config) = @_;
 
     my $ftp = $self->prep(%config);
-
-    $ftp->mkdir($self->GetCommon('RemoteDir'), $self->GetCommon('Recurse'));
+    my $rd =  $self->GetCommon('RemoteDir');
+    my $r  =  $self->GetCommon('Recurse');
+    $ftp->mkdir($rd, $r);
 }
 
 # The Perl -e operator for files on a remote site. Even though the
@@ -400,7 +412,7 @@ Net::FTP::Common - simplify common usages of Net::FTP
 
   # Let's list the default dir on several hosts
  
- @host_listings = map { $ez->ls(Host => $_) } @host_list
+  @host_listings = map { $ez->ls(Host => $_) } @host_list
 
   # Let's get the listings of several directories
 
@@ -466,8 +478,11 @@ Net::FTP::Common - simplify common usages of Net::FTP
   # note this is no more than you manually calling:
   # (scalar grep { $_ eq 'needed-file.txt' } $ez->ls) > 0;
 
-The test suite contains plenty of common examples.
+  # Let's get all output written to STDERR to goto a logfile
 
+  my $ez = Net::FTP::Common->new( { %CFG, STDERR => $logfile }, %netftp_cfg);
+
+The test suite contains plenty of common examples.
 
 =head1 DESCRIPTION
 
@@ -500,14 +515,6 @@ Note well that you NEVER have to login first. All API functions automatically lo
 specified directory. However, sometimes it is useful to see if you can actually login before
 attempting to do something else on an FTP site. This is the only time you will need the login() API method.
 
-Note well: though Net::FTP works in the stateful way that the FTP protocol 
-does, Net::FTP::Common works in a stateless "one-hit" fashion. That is, for
-each separate call to the API, a connection is established, the particular
-Net::FTP::Common functionality is performed and the connection is dropped.
-The disadvantage of this approach is the (usually irrelevant and 
-insignificant) overhead of connection and disconnection. The
-advantage is that there is much less chance of incurring failure due
-to timeout.
 
 =head1 METHODS
 

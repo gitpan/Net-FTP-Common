@@ -7,6 +7,15 @@ WriteMakefile(
     'PREREQ_PM'		=> { Net::FTP => 1 }, # e.g., Module::Name => 1.1
 );
 
+sub MY::postamble { q{
+
+docs : README
+
+README: lib/Net/FTP/Common.pm
+	pod2text lib/Net/FTP/Common.pm > README
+	}
+		}
+
 print(<<'EOF');
 			   Important Notes!
 			   ---------------

@@ -1,33 +1,45 @@
-use AppConfig::Std;
+use AppConfig qw(:argcount);
 use Data::Dumper;
 use File::Find;
 use Net::FTP::Common;
 use strict;
 
 
+my $lockfile = '/tmp/net-ftp-rsync.lck';
+
+-e $lockfile and die "$lockfile must be removed before running script";
+
+#open L, ">$lockfile" or die "couldn't open $lockfile for writing: $!";
+#open(STDERR, ">&L");
+
+
 # 
 # get connection info
 #
 
-my $config = AppConfig::Std->new( { CASE=>1 } );
-my $sit  e = 'urth_';
-$config->define("$site$_") for qw(User Pass Host RemoteDir Type);
+my $config = AppConfig->new( {CASE => 1} ) ;
+my $site   = 'urth_';
+my $rl     = 'rsync_Location';
+
+$config->define("$site$_", { ARGCOUNT => ARGCOUNT_ONE  } ) 
+    for qw(User Pass Host RemoteDir Type);
+$config->define($rl,       { ARGCOUNT => ARGCOUNT_LIST });
+my $dir = $config->get($rl);
+
 $config->file('/Users/metaperl/.appconfig');
+
 my %urth = $config->varlist("^$site", 1);
+
 
 #
 # setup Net::FTP::Common object
 #
-our %netftp_cfg =
-    (Debug => 1, Timeout => 120);
+our %netftp_cfg = (Debug => 1, Timeout => 120);
+my $ez = Net::FTP::Common->new({ %urth, STDERR => $lockfile }, %netftp_cfg);
 
-my $ez = Net::FTP::Common->new(\%urth, %netftp_cfg);
+warn Data::Dumper->Dump([\%urth, $dir],[qw(urth dir)]);
 
-#
-# traverse directory tree, uploading files which *dont* exist
-# this script is now a mdtm checker. that's for later
-#
-find(\&wanted, "/Users/metaperl/Documents");
+find(\&wanted, @$dir);
 
 #
 # convert local absolute paths to remote absolute paths
@@ -77,3 +89,6 @@ sub wanted {
 }
 
 
+close(Net::FTP::Common::DUP);
+
+unlink $lockfile;
