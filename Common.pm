@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Net::FTP);
 
-$VERSION = '1.8';
+$VERSION = '1.9';
 
 
 # Preloaded methods go here.
@@ -57,10 +57,7 @@ sub login {
   my $ftp_session = 
     Net::FTP->new($host, %{$self->{NetFTP}});
 
-  if (!$ftp_session) {
-    die "error connecting to $host: $!";
-    return 0;
-  }
+  $ftp_session or return 0;
 
   $ftp_session->login($self->{Common}->{User},$self->{Common}->{Pass}) 
     && return $ftp_session 
@@ -275,7 +272,7 @@ Net::FTP.
 
 
   # can we login to the machine?
-  $ez->login($host) || die "cant login";
+  $ez->login($host) || die "cant login: $@";
 
 
 =head1 DESCRIPTION
