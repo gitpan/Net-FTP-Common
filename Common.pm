@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Net::FTP);
 
-$VERSION = '1.6';
+$VERSION = '1.8';
 
 
 # Preloaded methods go here.
@@ -39,6 +39,9 @@ sub new {
 
     @{$self->{Common}}{keys %common_cfg} = values %common_cfg;
     @{$self->{NetFTP}}{keys %netftp_cfg} = values %netftp_cfg;
+
+#    warn Data::Dumper->Dump([$self],['SELF']);
+
     bless $self, $pkg;
 }
 
@@ -47,11 +50,15 @@ sub new {
 sub login {
   my ($self,$host) = @_;
 
+#  warn Data::Dumper->Dump([$self],['self(login)']);
+
+#  warn "HOST(login): $host";
+
   my $ftp_session = 
     Net::FTP->new($host, %{$self->{NetFTP}});
 
   if (!$ftp_session) {
-    warn "error connecting to $host: $!";
+    die "error connecting to $host: $!";
     return 0;
   }
 
@@ -66,7 +73,7 @@ sub dir {
 
     my $ftp = $self->login($host);
 
-    use Data::Dumper; print Data::Dumper->Dump([$ftp],['ftp']);
+    use Data::Dumper; print Data::Dumper->Dump([$ftp],['ftp(dir)']);
 
     $ftp->cwd($self->{Common}->{Dir});
 
@@ -98,17 +105,17 @@ sub check {
 }
 
 sub glob {
-    warn Data::Dumper->Dump([\@_],['@_(glob)']);
+#    warn Data::Dumper->Dump([\@_],['@_(glob)']);
     my ($self,$host,%cfg) = @_;
 
-    warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
+#    warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
 
     my @listing = $self->dir($host);
 
-    grep { $_ =~ $cfg{File} } @listing;
+    grep { $_ =~ /$cfg{File}/ } @listing;
 }
 
-sub grep { warn Data::Dumper->Dump([\@_],['@_']); goto &glob }
+sub grep { goto &glob }
 
 # The Perl -e operator for files on a remote site. Even though the
 # REBOL exists? word works on local files as well as URL's, Perl's does 
@@ -123,11 +130,11 @@ sub file_exists {
 
   my @ls = ftp_session_ls($ftp_session);
 
-  warn "* Grepping for $file in Listing @ls";
+#  warn "* Grepping for $file in Listing @ls";
 
   my @grep = (grep { $file eq $_ } @ls);
   
-  warn "* Grep @grep";
+#  warn "* Grep @grep";
 
   return (@grep > 0) ;
 }
@@ -144,11 +151,11 @@ sub ftp_file_exists_re {
 
   my @ls = ftp_session_ls($ftp_session);
 
-  warn "* re_Grepping for $file in Listing @ls";
+#  warn "* re_Grepping for $file in Listing @ls";
 
   my @grep = (grep { $_ =~ /$file/ } @ls);
   
-  warn "* Grep @grep";
+#  warn "* Grep @grep";
 
   return (@grep > 0) ;
 }
@@ -288,6 +295,8 @@ to timeout.
 
 =head2 TRAPS FOR THE UNWARY
 
+=item *
+
   @file = $ez->grep($host, File => '[A-M]*[.]txt');
   
 is correct
@@ -296,6 +305,16 @@ is correct
 
 looks correct but is not because you did not name the argument as you are 
 supposed to.
+
+=item * 
+
+In the current dain-bramaged interface, you can catch the bozak when you 
+accidentally forget to specify the $host argument to Net::FTP::Common's API 
+functions.   
+
+Since no one seems to be using this, I may in fact rework the API to allow the
+host to be a default instead of requiring it's specification.
+
 
 =head2 EXPORT
 
