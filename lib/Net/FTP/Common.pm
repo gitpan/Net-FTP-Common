@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '3.9';
+$VERSION = '4.0';
 
 # Preloaded methods go here.
 
@@ -820,13 +820,19 @@ client, we need something like they have in python:
 
 =back
 
-=head1 OTHER FTP OFFERINGS
+=head1 SEE ALSO
 
 =over 4
+
+=item 
 
 =item * http://lftp.yar.ru
 
 =item * L<Net::FTP::Recursive|Net::FTP::Recursive>
+
+=item * L<Net::FTP::blat>
+
+=item * L<Tie::FTP>
 
 =back
 
