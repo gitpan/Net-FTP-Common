@@ -5,11 +5,13 @@ TODO
 lib/Net/FTP/Common.pm
 lib/TestConfig.pm
 Makefile.PL
-release.sh
+release
 scripts/rsync-ftp/README
+scripts/rsync-ftp/architecture.text
 scripts/rsync-ftp/mmddyy.pl
 scripts/rsync-ftp/crontab-entry
-scripts/rsync-ftp/rsync.pl
+scripts/rsync-ftp/rsync-files-wanted.pl
+scripts/rsync-ftp/rsync-upload-files.pl
 t/0-login.t
 t/dir.t
 t/ls.t

@@ -6,11 +6,12 @@ use Carp qw(cluck confess);
 use Data::Dumper;
 use Net::FTP;
 
+
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.14 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.17 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -41,7 +42,7 @@ sub new {
 
   if (my $file = $self->{Common}{STDERR}) {
       open DUP, ">$file" or die "cannot dup STDERR to $file: $!";
-      lstat DUP; # kill used only once error
+#      lstat DUP; # kill used only once error
       open STDERR, ">&DUP";
   }
 
@@ -296,8 +297,11 @@ sub get {
   if ($r = $ftp->get($self->GetCommon('RemoteFile'), $local_file)) {
       return $r;
   } else { 
-    warn sprintf "download of %s to %s failed",
+    warn sprintf 'download of %s to %s failed',
 	  $self->GetCommon('RemoteFile'), $self->GetCommon('LocalFile');
+    warn 
+	'here are the settings in your Net::FTP::Common object: %s',
+	Dumper($self);
     return undef;
 }
   
