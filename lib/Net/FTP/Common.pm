@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.8 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.9 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -107,6 +107,56 @@ sub ls {
     return @{$ls};
   }
 }
+
+# contributed by kevin evans
+# this returns a hash of hashes keyed by filename with attributes for each
+sub dir {       
+  my ($self, @config) = @_;
+  my %config=@config;
+
+
+  my $ftp = $self->prep(%config);
+
+  my $dir = $ftp->dir;
+  if (!defined($dir)) {
+    return ();
+  } else
+  {
+    my %HoH;
+    foreach (@{$dir})
+        {
+        $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
+
+        my $perm = $1;
+        my $inode = $2;
+        my $owner = $3;
+        my $group = $4;
+        my $size = $5;
+        my $month = $6;
+        my $day = $7;
+        my $yearOrTime = $8;
+        my $name = $9;
+        my $linkTarget;
+
+        if ( $' =~ m#\s*->\s*([A-Za-z0-9.-/]*)# )       # it's a symlink
+                { $linkTarget = $1; }
+
+        $HoH{$name}{perm} = $perm;
+        $HoH{$name}{inode} = $inode;
+        $HoH{$name}{owner} = $owner;
+        $HoH{$name}{group} = $group;
+        $HoH{$name}{size} = $size;
+        $HoH{$name}{month} = $month;
+        $HoH{$name}{day} = $day;
+        $HoH{$name}{yearOrTime} =  $yearOrTime;
+        $HoH{$name}{linkTarget} = $linkTarget;
+
+        }
+  return(%HoH);
+  }
+}
+
+
 
 sub mkdir {
     my ($self,%config) = @_;
@@ -276,6 +326,35 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
 
   @dir_listings  = map { $ez->ls(RemoteDir  => $_) } @dir_list;
 
+  # Let's get a detailed directory listing... (thanks Kevin!)
+ 
+  %listing =	$ez->dir; # Note this is a hash, not an array return value.
+
+  ### representative output
+
+            'test' => {
+                      'owner' => 'root',
+                      'month' => 'Jan',
+                      'linkTarget' => undef,
+                      'inode' => '1',
+                      'size' => '6',
+                      'group' => 'root',
+                      'yearOrTime' => '1999',
+                      'day' => '27',
+                      'perm' => '-rw-r--r--'
+                    },
+          'ranc' => {
+                      'owner' => 'root',
+                      'month' => 'Oct',
+                      'linkTarget' => undef,
+                      'inode' => '2',
+                      'size' => '4096',
+                      'group' => 'root',
+                      'yearOrTime' => '00:42',
+                      'day' => '31',
+                      'perm' => 'drwxr-xr-x'
+                    }
+
   # Get a file from the remote machine
 
   $ez->get(File => 'codex.txt', LocalFile => '/tmp/crypto.txt');
@@ -425,6 +504,102 @@ example:
  my @dir =qw (/tmp /pub /gnu);
  map { @{$dir{$_}} = $ftp->ls(RemoteDir => $_ ) } @dir;
 
+=head2 $ez->dir (%override)
+
+When given no arguments, C<dir()> uses Common configuration
+information to login to the ftp site, change directory and transfer
+type and then return a hash of with detailed description of directory 
+contents. You may only call
+this routine and expect a hash back.
+
+You may give this function any number of configuration arguments to over-ride the predefined configuration options. 
+
+Here is the results of the example from the the test suite (t/dir.t):
+
+ my %retval = $ez->dir;
+ use Data::Dumper;
+ warn "NEW_DIR ...", Dumper(\%retval);
+
+          'incoming' => {
+                          'owner' => 'root',
+                          'month' => 'Jul',
+                          'linkTarget' => undef,
+                          'inode' => '2',
+                          'size' => '4096',
+                          'group' => 'root',
+                          'yearOrTime' => '2001',
+                          'day' => '10',
+                          'perm' => 'drwxrwxrwx'
+                        },
+
+          'test' => {
+                      'owner' => 'root',
+                      'month' => 'Jan',
+                      'linkTarget' => undef,
+                      'inode' => '1',
+                      'size' => '6',
+                      'group' => 'root',
+                      'yearOrTime' => '1999',
+                      'day' => '27',
+                      'perm' => '-rw-r--r--'
+                    },
+          'SEEMORE-database' => {
+                                  'owner' => 'mel',
+                                  'month' => 'Aug',
+                                  'linkTarget' => 'image',
+                                  'inode' => '1',
+                                  'size' => '14',
+                                  'group' => 'lnc',
+                                  'yearOrTime' => '20:35',
+                                  'day' => '15',
+                                  'perm' => 'lrwxrwxrwx'
+                                },
+          'holt' => {
+                      'owner' => 'holt',
+                      'month' => 'Jun',
+                      'linkTarget' => undef,
+                      'inode' => '2',
+                      'size' => '4096',
+                      'group' => 'daemon',
+                      'yearOrTime' => '2000',
+                      'day' => '12',
+                      'perm' => 'drwxr-xr-x'
+                    },
+          'SEEMORE-images' => {
+                                'owner' => 'mel',
+                                'month' => 'Aug',
+                                'linkTarget' => 'images',
+                                'inode' => '1',
+                                'size' => '6',
+                                'group' => 'lnc',
+                                'yearOrTime' => '20:35',
+                                'day' => '15',
+                                'perm' => 'lrwxrwxrwx'
+                              },
+          'dlr' => {
+                     'owner' => 'root',
+                     'month' => 'Sep',
+                     'linkTarget' => undef,
+                     'inode' => '2',
+                     'size' => '4096',
+                     'group' => 'root',
+                     'yearOrTime' => '1998',
+                     'day' => '11',
+                     'perm' => 'drwxr-xr-x'
+                   },
+          'fiser' => {
+                       'owner' => '506',
+                       'month' => 'May',
+                       'linkTarget' => undef,
+                       'inode' => '2',
+                       'size' => '4096',
+                       'group' => 'daemon',
+                       'yearOrTime' => '1996',
+                       'day' => '25',
+                       'perm' => 'drwxr-xr-x'
+                     },
+
+
 =head2 $ez->mkdir (%override)
 
 Makes directories on remote FTP server. Will recurse if Recurse => 1 is
@@ -485,6 +660,10 @@ supposed to.
 
 =over 4
 
+=item * A slide talk on Net::FTP::Common in HTML format is available at
+
+  http://www.metaperl.com
+
 =item * big change from version after 2.30:
 
 C<Dir> has been changed to C<RemoteDir> to avoid confusion.
@@ -496,7 +675,7 @@ warning is thrown by Net::FTP:
 
  (in cleanup) Not a GLOB reference at Net/FTP.pm line 147.
 
-This is a harmless method that I should fix some day.
+This is a harmless error that I should fix some day.
 
 =back
 
@@ -504,5 +683,6 @@ This is a harmless method that I should fix some day.
 
 T. M. Brannon <tbone@cpan.org>
 
+dir() method contributed by Kevin Evans (kevin _! a t (* i n s i g ht dot-com
 
 =cut
