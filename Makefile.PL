@@ -4,12 +4,12 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Net::FTP::Common',
     'VERSION_FROM'	=> 'Common.pm', # finds $VERSION
-    'PREREQ_PM'		=> { Net::FTP => 0 }, # e.g., Module::Name => 1.1
+    'PREREQ_PM'		=> { Net::FTP => 1 }, # e.g., Module::Name => 1.1
 );
 
 print(<<EOF);
-Important Notes!
----------------
+			   Important Notes!
+			   ---------------
 Net::FTP::Common is built on top, and requires, Net::FTP.
 
 Net::FTP is available from the libnet distribution on CPAN.
@@ -24,5 +24,11 @@ I am not a Net::FTP expert, so don't expect miracles :)
 
 But of course for any issues with Net::FTP::Common, contact me
 immediately please.
+
+			     Installation
+			     ------------
+make
+make test (if you have an internet connection right now)
+make install
 EOF
 

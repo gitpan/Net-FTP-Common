@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION =   '2.0';
+$VERSION =   '2.1';
 
 # Preloaded methods go here.
 
@@ -46,6 +46,14 @@ sub new {
     bless $new_self, $pkg;
 }
 
+sub Config {
+    my $self = shift;
+    my %tmp = @_;
+    my %common = %{$tmp{New}};
+
+    @{$self->{Common}}{keys %common} = values %common;
+}
+
 sub Host { $_[0]->{Common}->{Host} or die "Host must be defined when creating a __PACKAGE__ object" }
 
 sub NetFTP { $_[0]->prep }
@@ -63,7 +71,7 @@ sub login {
 sub dir {
   my ($self, %config) = @_;
 
-  my $ftp = $self->prep($config{New});
+  my $ftp = $self->prep(%{$config{New}});
 
   my $ls = $ftp->ls;
   if (!defined($ls)) {
@@ -206,7 +214,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
   # Get a file from the remote machine
   $ez->get(File => 'codex.txt', LocalFile => '/tmp/crypto.txt');
 
-  # Send a file to the remote machine
+  # Send a file to the remote machine (*dont* use put!)
   $ez->send(File => 'codex.txt');
 
   # test for a file's existence on the remote machine (using =~)
@@ -220,6 +228,7 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
   # note this is no more than you manually calling:
   # (scalar grep { $_ eq 'needed-file.txt' } $ez->dir) > 0;
 
+The test suite contains plenty of common examples.
 
 =head1 DESCRIPTION
 

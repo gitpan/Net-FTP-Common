@@ -2,4 +2,9 @@ Changes
 Common.pm
 MANIFEST
 Makefile.PL
-test.pl
+t/dir.t
+t/grep.t
+t/login.t
+t/xfer.t
+
+
