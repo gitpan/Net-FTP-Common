@@ -5,6 +5,7 @@ TODO
 lib/Net/FTP/Common.pm
 lib/TestConfig.pm
 Makefile.PL
+net-ftp-scripts/ping-servers-in-parallel.pl
 release
 samples/upload-sicilian.pl
 scripts/upload-cpan.pl
@@ -22,3 +23,4 @@ t/ls.t
 t/grep.t
 t/xfer.t
 t/dldir/README
+META.yml                                Module meta-data (added by MakeMaker)
