@@ -49,9 +49,10 @@ ok("@host_listings", qr/reference_tools/);
 # Let's list several directories on the same host
 #
 $ez->Common(Host => 'ftp.fedworld.gov');
-my @dir_list = qw(/pub/irs-99 /pub/irs-98);
+my @dir_list = qw(/pub/Forms/Election /pub/Speeches);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
-ok("@dir_listings", qr/f5500.pdf/);
+warn "complete dir listing: @dir_listings";
+ok("@dir_listings", qr/election.pdf/);
 
 

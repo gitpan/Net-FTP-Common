@@ -18,10 +18,3 @@ t/ls.t
 t/grep.t
 t/xfer.t
 t/dldir/README
-t.old/newport/cd-invalid.t
-t.old/newport/cd-valid.t
-t.old/newport/login-invalid.t
-t.old/newport/login-valid.t
-t.old/newport/retr-patch-unauthorized.t
-t.old/newport/retr-patch-authorized.t
-t.old/newport/retr-patch-obsoleted.t
