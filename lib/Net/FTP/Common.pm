@@ -2,54 +2,76 @@ package Net::FTP::Common;
 
 use strict;
 
+use Attribute::Property;
 use Carp qw(cluck confess);
 use Data::Dumper;
 use Net::FTP;
 
+@Net::FTP::Common::ISA     = qw(Net::FTP);
+$Net::FTP::Common::VERSION = '0.0_alpha';
 
-use vars qw(@ISA $VERSION);
+sub Account    : Property;
+sub Debug      : Property;
+sub FTPSession : Property;
+sub Grep       : Property;
+sub Host       : Property;
+sub LocalDir   : Property;
+sub LocalFile  : Property;
+sub LogFile    : Property;
+sub Pass       : Property;
+sub Passive    : Property;
+sub Recurse    : Property;
+sub RemoteDir  : Property;
+sub RemoteFile : Property;
+sub Timeout    : Property;
+sub Type       : Property;
+sub User       : Property;
 
-@ISA     = qw(Net::FTP);
-
-$VERSION = '3.5';
-
-# Preloaded methods go here.
 
 sub new {
-  my $pkg  = shift;
-  my $common_cfg_in = shift;
-  my %netftp_cfg_in = @_;
+  
+  my ($class, $common_cfg_in, %netftp_cfg_in) = @_;
 
   my %common_cfg_default = 
     (
-     Host => 'ftp.microsoft.com',
+     Host => 'ftp.kernel.org',
      RemoteDir  => '/pub',
-     LocalDir  => '.',   # setup something for $ez->get
+     LocalDir  => '.',		# setup something for $ez->get
      Type => 'I'
     );
 
-  my %netftp_cfg_default = ( Debug => 1, Timeout => 240, Passive => 1 );
+  my %netftp_cfg_default = ( Debug => 0, Timeout => 240, Passive => 1 );
 
-  # overwrite defaults with values supplied by constructor input
-  @common_cfg_default{keys %$common_cfg_in} = values %$common_cfg_in;
-  @netftp_cfg_default{keys  %netftp_cfg_in} = values  %netftp_cfg_in;
-    
-  my $self = {};
+  my $self = bless {}, $class;
 
-  @{$self->{Common}}{keys %common_cfg_default} = values %common_cfg_default;
-  @{$self          }{keys %netftp_cfg_default} = values %netftp_cfg_default;
-
-  my $new_self = { %$self, Common => $self->{Common} } ;
-
-  if (my $file = $self->{Common}{STDERR}) {
-      open DUP, ">$file" or die "cannot dup STDERR to $file: $!";
-      lstat DUP; # kill used only once error
-      open STDERR, ">&DUP";
+  while (my ($k,$v)      = (each %common_cfg_default)) {
+    $self->$k($v);
   }
 
+ while (my ($k,$v)      = (each %netftp_cfg_default)) {
+    $self->$k($v);
+  }
 
-  bless $new_self, $pkg;
+  while (my ($k,$v)      = (each %$common_cfg_in)) {
+    $self->$k($v);
+  }
+
+  while (my ($k,$v)      = (each %netftp_cfg_in)) {
+    $self->$k($v);
+  }
+
+  warn Dumper($self);
+
+  if (my $file = $self->{LogFile}) {
+    open NFC_DUP, ">$file" or die "cannot dup STDERR to $file: $!";
+    lstat NFC_DUP;			# kill used only once error
+    open STDERR, ">&NFC_DUP";
+  }
+
+  $self;
 }
+
+
 
 sub Common {
     my $self = shift;
@@ -64,80 +86,46 @@ expect it to get a value. use GetCommon() for that.
 Here is what you passed in.
 ", Dumper(\@_);
 
-    my %tmp = @_;
-
-#    warn "HA: ", Dumper(\%tmp,\@_);
-
-    @{$self->{Common}}{keys %tmp} = values %tmp;
-}
-
-sub GetCommon {
-    my ($self,$key) = @_;
-
-    if ($key) {
-	if (defined($self->{Common}{$key})) {
-	    return ($self->{Common}{$key});
-	} else {
-	    return undef;
-	}
-    } else {
-	$self->{Common};
-    }
-}
-
-sub Host { 
-    $_[0]->{Common}->{Host}
-
-      or die "Host must be defined when creating a __PACKAGE__ object"
-}
-
-sub NetFTP { 
-
-    my ($self, %config) = @_;
-
-    @{$self}{keys %config} = values %config;
+    while (my ($k, $v) = splice @_, 0, 2) 
+      {
+	$self->$k($v);
+      }
 
 }
 
 sub login {
+  warn Dumper (\@_) if $_[0]->Debug > 3;
   my ($self, %config) = @_;
 
-#  my $ftp_session = Net::FTP->new($self->Host, %{$self->{NetFTP}});
-  my $ftp_session = Net::FTP->new($self->Host, %$self);
 
-#  $ftp_session or return undef;
+#  my $ftp_session = Net::FTP->new($self->Host, %{$self->{NetFTP}});
+  my $ftp_session = Net::FTP->new($self->Host, %$self, %config);
+
+  #  $ftp_session or return undef;
   $ftp_session or 
       die 'FATAL: attempt to create Net::FTP session failed.
 Most likely reason for this is lack of internet connectivity.
 ';
 
   my $session;
-  my $account = $self->GetCommon('Account');
-  if ($self->GetCommon('User') and $self->GetCommon('Pass')) {
-      $session = 
-	  $ftp_session->login($self->GetCommon('User') , 
-			      $self->GetCommon('Pass'),
-			      $account);
+  my $account = $self->Account;
+#  warn "USERPASS: ", Dumper($self);
+  if ($self->User and $self->Pass) {
+      $session = $ftp_session->login($self->User, $self->Pass, $account);
   } else {
       warn "either User or Pass was not defined. Attempting .netrc for login";
-      $session = 
-	  $ftp_session->login;
+      $session = $ftp_session->login;
   }
 
-  $session and ($self->Common('FTPSession', $ftp_session)) 
-    and return $ftp_session 
-      or 
-	warn "error logging in: $!" and return undef;
-
+  $session and $self->FTPSession = $ftp_session and return $ftp_session 
+    or 
+      warn "error logging in: $!" and return undef;
 }
 
 sub ls {
-  my ($self, @config) = @_;
-  my %config=@config;
-
-  my $ftp = $self->prep(%config);
-
-  my $ls = $ftp->ls;
+  my $self = shift;
+  my $ftp  = $self->prep(@_);
+  my $ls   = $ftp->ls;
   if (!defined($ls)) {
     return ();
   } else {
@@ -201,12 +189,10 @@ sub dir {
 
 
 sub mkdir {
-    my ($self,%config) = @_;
+    my $self = shift;
+    my $ftp  = $self->prep(@_);
 
-    my $ftp = $self->prep(%config);
-    my $rd =  $self->GetCommon('RemoteDir');
-    my $r  =  $self->GetCommon('Recurse');
-    $ftp->mkdir($rd, $r);
+    $ftp->mkdir($self->RemoteDir, $self->Recurse);
 }
 
 # The Perl -e operator for files on a remote site. Even though the
@@ -218,18 +204,18 @@ sub exists {
 
     my @listing = $self->ls(%cfg);
 
-    my $rf = $self->GetCommon('RemoteFile');
+    my $rf = $self->RemoteFile;
 
     warn sprintf "[checking @listing for [%s]]", $rf;
 
-    scalar grep { $_ eq $self->GetCommon('RemoteFile') } @listing;
+    scalar grep { $_ eq $self->RemoteFile } @listing;
 }
 
 sub grep {
 
     my ($self,%cfg) = @_;
 
-#    warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
+#   warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
 
     my @listing = $self->ls(%cfg);
 
@@ -241,10 +227,9 @@ sub connected {
 
 #    warn "CONNECTED SELF ", Dumper($self);
 
-    my $session = $self->GetCommon('FTPSession') or return 0;
+    my $session = $self->FTPSession or return;
 
     local $@;
-    my $pwd;
     my $connected = $session->pwd ? 1 : 0;
 #    warn "connected: $connected RESP: $connected";
     $connected;
@@ -252,16 +237,17 @@ sub connected {
 
 sub prepped {
     my $self = shift; 
-    my $prepped = $self->GetCommon('FTPSession') and $self->connected;
+    my $prepped = $self->FTPSession and $self->connected;
 #    warn "prepped: $prepped";
     $prepped;
 }
 
 sub prep {
   my $self = shift;
-  my %cfg  = @_;
 
-  $self->Common(%cfg);
+  my $host = $self->Host; # in prep for not relogging in each time
+
+  $self->Common(@_);
 
 # This will not work if the Host changes and you are still connected 
 # to the prior host. It might be wise to simply drop connection 
@@ -272,67 +258,51 @@ sub prep {
 # So instead:
   my $ftp = $self->login ;
 
-  if ($self->{Common}->{RemoteDir}) {
-      $ftp->cwd($self->GetCommon('RemoteDir'))
+  if ($self->RemoteDir) {
+      $ftp->cwd($self->RemoteDir)
   } else {
-      warn "RemoteDir not configured. ftp->cwd will not work. certain Net::FTP usages will failed.";
+      warn "RemoteDir not configured. ftp->cwd will not work. certain Net::FTP usages will fail.";
   }
-  $ftp->type($self->GetCommon('Type'));
+  $ftp->type($self->Type);
 
   $ftp;
 }
 
-sub binary {
-    my $self = shift;
+sub binary { shift()->Type = 'I' }
+sub ascii  { shift()->Type = 'A' }
 
-    $self->{Common}{Type} = 'I';
-}
-
-sub ascii {
-    my $self = shift;
-
-    $self->{Common}{Type} = 'A';
-}
 
 sub get {
 
-  my ($self,%cfg) = @_;
+  my $self = shift;
 
-  my $ftp = $self->prep(%cfg);
+  my $ftp = $self->prep(@_);
 
-  my $r;
-
-  my $file;
-  if ($self->GetCommon('LocalFile')) {
-      $file= $self->GetCommon('LocalFile');
-  } else {
-      $file=$self->GetCommon('RemoteFile');
-  }
+  my $file = $self->LocalFile ? $self->LocalFile : $self->RemoteFile ;
 	
-  my $local_file = join '/', ($self->GetCommon('LocalDir'), $file);
+  my $local_file = join '/', $self->LocalDir, $file;
 		
 #  warn "LF: $local_file ", "D: ", Dumper($self);
 
-
-  if ($r = $ftp->get($self->GetCommon('RemoteFile'), $local_file)) {
+  if (my $r = $ftp->get($self->RemoteFile, $local_file)) {
       return $r;
   } else { 
     warn sprintf 'download of %s to %s failed',
-	  $self->GetCommon('RemoteFile'), $self->GetCommon('LocalFile');
+	  $self->RemoteFile, $self->LocalFile;
     warn 
 	'here are the settings in your Net::FTP::Common object: %s',
 	Dumper($self);
     return undef;
+  }
 }
   
 
-}
 
 sub file_attr {
     my $self = shift;
     my %hash;
     my @key = qw(LocalFile LocalDir RemoteFile RemoteDir);
-    @hash{@key} = @{$self->{Common}}{@key};
+    $hash{$_} = $self->$_ for @key;
     %hash;
 }
 
@@ -341,9 +311,9 @@ sub bad_filename {
 }
 
 sub send {
-  my ($self,%cfg) = @_;
+  my $self = shift;
 
-  my $ftp = $self->prep(%cfg);
+  my $ftp = $self->prep(@_);
 
 #  warn "send_self", Dumper($self);
 
@@ -786,7 +756,7 @@ AppConfig anyway, it rocks the house.
 
 =item * subscribe to the mailing list via
 
-net-ftp-common-subscribe@yahoogroups.com
+  net-ftp-common-subscribe@yahoogroups.com
 
 =back
 
@@ -828,6 +798,31 @@ client, we need something like they have in python:
 
 =back
 
+=head1 ERROR REPORTING
+
+=head2 Getting and Setting within the Object:
+
+Because all versions of Net::FTP::Common past 3.5 use L<Attribute::Property>
+to handle object manipulation, you will get error messages if you try to 
+get/set fields within the object which were not predefined.
+
+If you use this syntax to set slots:
+
+  $object->KeyThatDoesntExist(23);
+
+You will get this sort of error:
+
+ Can't locate class method 'Net::FTP::Common::KeyThatDoesntExist' via package 'Net::FTP::Common' at /home/Keith/hacks/Net-FTP-Common-3.5/scratch/Net-FTP-Common-3.5/blib/lib/Net/FTP/Common.pm line 47
+
+If you use this syntax to get/set slots:
+
+  $object->KeyThatDoesntExist = 23;
+
+You will get this sort of error:
+
+ Can't modify non-lvalue subroutine call at /home/Keith/hacks/Net-FTP-Common-3.5/scratch/Net-FTP-Common-3.5/blib/lib/Net/FTP/Common.pm line 47.
+
+Which is much harder to track down.
 
 =head1 AUTHOR
 

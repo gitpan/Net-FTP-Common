@@ -22,5 +22,6 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
-my $retval = $ez->login;
+warn Dumper($ez);
+my $retval = $ez->login (Debug => 4);
 ok("$retval", qr/Net::FTP=GLOB/);
