@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.0';
+$VERSION = '5.1';
 
 # Preloaded methods go here.
 
@@ -107,9 +107,10 @@ sub login {
 
 #  $ftp_session or return undef;
   $ftp_session or 
-      die 'FATAL: attempt to create Net::FTP session failed.
-Most likely reason for this is lack of internet connectivity.
-';
+      die sprintf 'FATAL: attempt to create Net::FTP session on host %s failed.
+If you cannot figure out why, supply the configuration parameters when
+emailing the support email list.
+Here are configuration parameters: %s', $self->Host, Dumper($self);
 
   my $session;
   my $account = $self->GetCommon('Account');
