@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Net::FTP);
 
-$VERSION = '1.3';
+$VERSION = '1.4';
 
 
 # Preloaded methods go here.
@@ -103,7 +103,7 @@ sub glob {
 
     my @listing = $self->dir($host);
 
-    scalar grep { $_ =~ $cfg{File} } @listing;
+    grep { $_ =~ $cfg{File} } @listing;
 }
 
 sub grep { goto &glob }
@@ -251,13 +251,9 @@ Net::FTP.
   $ez->send($host, File => 'codex.txt');
 
   # test for a file's existence on the remote machine (using =~)
-  $ez->grep($host, File => '[A-M]*[.]txt');
+  @file = $ez->grep($host, File => '[A-M]*[.]txt');
   # a synonym for grep is glob (no difference, just another name)
-  $ez->glob($host, File => 'n.*-file.t?t');
-  # note this is no more than you manually calling:
-  # (scalar grep { $_ =~ 'n.*-file.t?t' } $ez->dir($host)) > 0;
-
-
+  @file = $ez->glob($host, File => 'n.*-file.t?t');
 
   # test for a file on the remote machine (using eq)
   $ez->check($host, File => 'needed-file.txt');
