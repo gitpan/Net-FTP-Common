@@ -13,7 +13,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA = qw(Net::FTP);
 
-$VERSION = '1.2';
+$VERSION = '1.3';
 
 
 # Preloaded methods go here.
@@ -106,13 +106,7 @@ sub glob {
     scalar grep { $_ =~ $cfg{File} } @listing;
 }
 
-sub grep {
-    my ($self,$host,%cfg) = @_;
-
-    my @listing = $self->dir($host);
-
-    grep { $_ =~ $cfg{File} } @listing;
-}
+sub grep { goto &glob }
 
 # The Perl -e operator for files on a remote site. Even though the
 # REBOL exists? word works on local files as well as URL's, Perl's does 
@@ -256,8 +250,14 @@ Net::FTP.
   # Send a file to the remote machine
   $ez->send($host, File => 'codex.txt');
 
-  # test for a file's existence on the remote machine (slash defaultusing eq)
-  $ez->grep($host, File => 'needed-file.txt');
+  # test for a file's existence on the remote machine (using =~)
+  $ez->grep($host, File => '[A-M]*[.]txt');
+  # a synonym for grep is glob (no difference, just another name)
+  $ez->glob($host, File => 'n.*-file.t?t');
+  # note this is no more than you manually calling:
+  # (scalar grep { $_ =~ 'n.*-file.t?t' } $ez->dir($host)) > 0;
+
+
 
   # test for a file on the remote machine (using eq)
   $ez->check($host, File => 'needed-file.txt');
@@ -267,10 +267,6 @@ Net::FTP.
   # (scalar $ez->grep($host)) > 0
 
 
-  # test for a file on the remote machine (using =~)
-  $ez->glob($host, File => 'n.*-file.t?t');
-  # note this is no more than you manually calling:
-  # (scalar grep { $_ =~ 'n.*-file.t?t' } $ez->dir($host)) > 0;
 
   # can we login to the machine?
   $ez->login($host) || die "cant login";
