@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '3.4';
+$VERSION = '3.5';
 
 # Preloaded methods go here.
 
@@ -160,6 +160,10 @@ sub dir {
   } else
   {
     my %HoH;
+
+    # Comments were made on this code in this thread:
+    # http://perlmonks.org/index.pl?node_id=287552
+
     foreach (@{$dir})
         {
 	    # $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
