@@ -21,16 +21,16 @@ my $ez = Net::FTP::Common->new
 
 $ez->Common
   (
-   Host => 'ftp.microsoft.com',
-   RemoteDir  => '/products/windows/windows95/cdromextras/funstuff',
-   RemoteFile =>  'clouds.exe'
+   Host => 'ftp.ddj.com',
+   RemoteDir  => '/2003/2003_07',
+   RemoteFile =>  'jelly.zip'
   );
 
 
 #
 # Test 1
 #
-my $retval = $ez->get(LocalFile => 'localname.exe');
+my $retval = $ez->get(LocalFile => 'localname.zip');
 ok($retval);
 
 #

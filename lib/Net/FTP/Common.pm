@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.28 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = '3.0';
 
 # Preloaded methods go here.
 
@@ -24,10 +24,11 @@ sub new {
     (
      Host => 'ftp.microsoft.com',
      RemoteDir  => '/pub',
+     LocalDir  => '.',   # setup something for $ez->get
      Type => 'I'
     );
 
-  my %netftp_cfg_default = ( Debug => 1, Timeout => 240 );
+  my %netftp_cfg_default = ( Debug => 1, Timeout => 240, Passive => 1 );
 
   # overwrite defaults with values supplied by constructor input
   @common_cfg_default{keys %$common_cfg_in} = values %$common_cfg_in;
@@ -42,7 +43,7 @@ sub new {
 
   if (my $file = $self->{Common}{STDERR}) {
       open DUP, ">$file" or die "cannot dup STDERR to $file: $!";
-#      lstat DUP; # kill used only once error
+      lstat DUP; # kill used only once error
       open STDERR, ">&DUP";
   }
 
@@ -253,7 +254,13 @@ sub prep {
 
   $self->Common(%cfg);
 
-  my $ftp = $self->connected ? $self->GetCommon('FTPSession') : $self->login ;
+# This will not work if the Host changes and you are still connected to the prior host.
+# It might be wise to simply drop connection if the Host key changes, but I don't think
+# I will go there right now.
+#  my $ftp = $self->connected ? $self->GetCommon('FTPSession') : $self->login ;
+# So instead:
+  my $ftp = $self->login ;
+
   if ($self->{Common}->{RemoteDir}) {
       $ftp->cwd($self->GetCommon('RemoteDir'))
   } else {
@@ -293,6 +300,8 @@ sub get {
 	
   my $local_file = join '/', ($self->GetCommon('LocalDir'), $file);
 		
+#  warn "LF: $local_file ", "D: ", Dumper($self);
+
 
   if ($r = $ftp->get($self->GetCommon('RemoteFile'), $local_file)) {
       return $r;
@@ -334,13 +343,13 @@ sub send {
       return;
   }
 
-  warn "send_fa: ", Dumper(\%fa);
+#  warn "send_fa: ", Dumper(\%fa);
 
   my $lf = sprintf "%s/%s", $fa{LocalDir}, $fa{LocalFile};
   my $RF = $fa{RemoteFile} ? $fa{RemoteFile} : $fa{LocalFile};
   my $rf = sprintf "%s/%s", $fa{RemoteDir}, $RF;
 
-  warn "[upload $lf as $rf]";
+#  warn "[upload $lf as $rf]";
 
   $ftp->put($lf, $RF) or 
       confess sprintf "upload of %s to %s failed", $lf, $rf;
@@ -379,7 +388,7 @@ Net::FTP::Common - simplify common usages of Net::FTP
      # Other options
      #
 
-     LocalDir  => '/tmp/downloads'   # setup something for $ez->get
+
      LocalFile => 'delete.zip'       # setup something for $ez->get
      Host => 'ftp.fcc.gov',          # overwrite ftp.microsoft.com default
      RemoteDir  => '/',                    # automatic CD on remote machine to RemoteDir

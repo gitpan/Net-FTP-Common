@@ -22,14 +22,16 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
-my @retval = $ez->grep(Grep => qr/^wel/);
+my @retval = $ez->grep(Grep => qr/^REA/);
+#my @listing = $ez->ls;
+#die Dumper(\@listing);
 warn "GREP RETVAL: @retval";
-ok("@retval","welcome.msg");
+ok("@retval", "README README_ABOUT_BZ2_FILES");
 
 
 #
 # Test 2
 #
-my $retval = $ez->exists(RemoteFile => 'welcome.msg');
+my $retval = $ez->exists(RemoteFile => 'dist');
 ok($retval);
 
