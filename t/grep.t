@@ -23,6 +23,7 @@ my $ez = Net::FTP::Common->new
 # Test 1
 #
 my @retval = $ez->grep(Grep => qr/^wel/);
+warn "GREP RETVAL: @retval";
 ok("@retval","welcome.msg");
 
 

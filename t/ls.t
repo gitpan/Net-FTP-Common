@@ -24,13 +24,13 @@ my $ez = Net::FTP::Common->new
 #
 # Test 1
 #
-my @retval = $ez->dir;
+my @retval = $ez->ls;
 ok("@retval", qr/welcome.msg/);
 
 #
 # Test 2
 #
-my @listing =   $ez->dir(RemoteDir => '/pub');
+my @listing =   $ez->ls(RemoteDir => '/pub');
 ok("@listing", qr/index.html/);
 
 #
@@ -39,7 +39,7 @@ ok("@listing", qr/index.html/);
 #
 $ez->Common(RemoteDir => '/pub');
 my @host_list = qw(ftp.fcc.gov ftp.fedworld.gov);
-my @host_listings = map { $ez->dir(Host => $_) } @host_list;
+my @host_listings = map { $ez->ls(Host => $_) } @host_list;
 
 ok("@host_listings", qr/reference_tools/);
 
@@ -50,7 +50,7 @@ ok("@host_listings", qr/reference_tools/);
 #
 $ez->Common(Host => 'ftp.fedworld.gov');
 my @dir_list = qw(/pub/irs-99 /pub/irs-98);
-my @dir_listings = map { $ez->dir(RemoteDir => $_) } @dir_list;
+my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
 ok("@dir_listings", qr/f5500.pdf/);
 

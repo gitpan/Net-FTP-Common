@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = sprintf '%s', q{$Revision: 2.7 $} =~ /\S+\s+(\S+)/ ;
+$VERSION = sprintf '%s', q{$Revision: 2.8 $} =~ /\S+\s+(\S+)/ ;
 
 # Preloaded methods go here.
 
@@ -93,7 +93,7 @@ sub login {
 
 }
 
-sub dir {
+sub ls {
   my ($self, @config) = @_;
   my %config=@config;
 
@@ -123,7 +123,7 @@ sub mkdir {
 sub exists {
     my ($self,%cfg) = @_;
 
-    my @listing = $self->dir(%cfg);
+    my @listing = $self->ls(%cfg);
 
     scalar grep { $_ eq $self->GetCommon('File') } @listing;
 }
@@ -134,7 +134,7 @@ sub grep {
 
 #    warn sprintf "self: %s host: %s cfg: %s", $self, $host, Data::Dumper::Dumper(\%cfg);
 
-    my @listing = $self->dir(%cfg);
+    my @listing = $self->ls(%cfg);
 
     grep { $_ =~ /$cfg{Grep}/ } @listing;
 }
@@ -261,20 +261,20 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
 
   # Get a listing of a remote directory 
  
-  @listing =	$ez->dir; 
+  @listing =	$ez->ls; 
 
   # Let's list a different directory, over-riding and changing the
   # default directory
  
-  @listing =	$ez->dir(RemoteDir => '/pub/rfcs'); 
+  @listing =	$ez->ls(RemoteDir => '/pub/rfcs'); 
 
   # Let's list the default dir on several hosts
  
- @host_listings = map { $ez->dir(Host => $_) } @host_list
+ @host_listings = map { $ez->ls(Host => $_) } @host_list
 
   # Let's get the listings of several directories
 
-  @dir_listings  = map { $ez->dir(RemoteDir  => $_) } @dir_list;
+  @dir_listings  = map { $ez->ls(RemoteDir  => $_) } @dir_list;
 
   # Get a file from the remote machine
 
@@ -305,15 +305,16 @@ Net::FTP::Common - Perl extension for simplifying common usages of Net::FTP.
   $ez->exists(File => 'needed-file.txt');
 
   # note this is no more than you manually calling:
-  # (scalar grep { $_ eq 'needed-file.txt' } $ez->dir) > 0;
+  # (scalar grep { $_ eq 'needed-file.txt' } $ez->ls) > 0;
 
 The test suite contains plenty of common examples.
 
 =head1 DESCRIPTION
 
 This module is intended to make the common uses of Net::FTP a
-one-line, no-argument affair. In software-engineering speak, the goal
-is to make use of FTP from Perl 95% configuration and 5% programming.
+one-line, no-argument affair. In other words, you have 100% programming with
+Net::FTP. With Net::FTP::Common you will have 95% configuration and 5%
+programming.  
 
 The way that it makes it a one-line affair is that the common
 pre-phase of login, cd, file type (binary/ascii) is handled for
@@ -407,9 +408,9 @@ load to logging in via a .netrc file.
 Normal login with C<User> and C<Pass> are tested. .netrc logins are not.
 
 
-=head2 $ez->dir (%override)
+=head2 $ez->ls (%override)
 
-When given no arguments, C<dir()> uses Common configuration
+When given no arguments, C<ls()> uses Common configuration
 information to login to the ftp site, change directory and transfer
 type and then return an array of directory contents. You may only call
 this routine in array context and unlike Net::FTP, it returns a list
@@ -422,7 +423,7 @@ example:
 
  my %dir;
  my @dir =qw (/tmp /pub /gnu);
- map { @{$dir{$_}} = $ftp->dir(RemoteDir => $_ ) } @dir;
+ map { @{$dir{$_}} = $ftp->ls(RemoteDir => $_ ) } @dir;
 
 =head2 $ez->mkdir (%override)
 
