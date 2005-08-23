@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2b';
+$VERSION = '5.2c';
 
 # Preloaded methods go here.
 
@@ -235,9 +235,6 @@ sub mkdir {
     $ftp->mkdir($rd, $r);
 }
 
-# The Perl -e operator for files on a remote site. Even though the
-# REBOL exists? word works on local files as well as URL's, Perl's does 
-# not. Shame isn't it? :-)
 
 sub exists {
     my ($self,%cfg) = @_;
@@ -246,7 +243,7 @@ sub exists {
 
     my $rf = $self->GetCommon('RemoteFile');
 
-    warn sprintf "[checking @listing for [%s]]", $rf;
+   warn sprintf "[checking @listing for [%s]]", $rf if $self->{Debug} ;
 
     scalar grep { $_ eq $self->GetCommon('RemoteFile') } @listing;
 }
@@ -820,6 +817,15 @@ AppConfig anyway, it rocks the house.
 =item * subscribe to the mailing list via
 
 net-ftp-common-subscribe@yahoogroups.com
+
+=head1 * A harmless warning
+
+When a Net::FTP::Common object is goes out of scope, the following warning 
+is thrown by Net::FTP: 
+
+  Not a GLOB reference at Net/FTP.pm line 147.
+
+This is a harmless warning that I should fix some day. 
 
 =back
 
