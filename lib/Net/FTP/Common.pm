@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2c';
+$VERSION = '5.2d';
 
 # Preloaded methods go here.
 
@@ -273,10 +273,20 @@ sub connected {
     $connected;
 }
 
+sub quit {
+    my $self = shift; 
+
+#    warn $self;
+
+    $self->connected and $self->GetCommon('FTPSession')->quit;
+
+}
+
+
 sub prepped {
     my $self = shift; 
     my $prepped = $self->GetCommon('FTPSession') and $self->connected;
-#    warn "prepped: $prepped";
+    #    warn "prepped: $prepped";
     $prepped;
 }
 
