@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2d';
+$VERSION = '5.2f';
 
 # Preloaded methods go here.
 
@@ -248,6 +248,19 @@ sub exists {
     scalar grep { $_ eq $self->GetCommon('RemoteFile') } @listing;
 }
 
+sub delete {
+    my ($self,%cfg) = @_;
+
+    my $ftp = $self->prep(%cfg);
+    my $rf  = $self->GetCommon('RemoteFile');
+
+    
+    warn Dumper \%cfg;
+
+    $ftp->delete($rf);
+
+}
+
 sub grep {
 
     my ($self,%cfg) = @_;
@@ -275,8 +288,6 @@ sub connected {
 
 sub quit {
     my $self = shift; 
-
-#    warn $self;
 
     $self->connected and $self->GetCommon('FTPSession')->quit;
 
@@ -336,27 +347,28 @@ sub get {
   my $r;
 
   my $file;
+
   if ($self->GetCommon('LocalFile')) {
-      $file= $self->GetCommon('LocalFile');
+    $file= $self->GetCommon('LocalFile');
   } else {
-      $file=$self->GetCommon('RemoteFile');
+    $file=$self->GetCommon('RemoteFile');
   }
 	
   my $local_file = join '/', ($self->GetCommon('LocalDir'), $file);
 		
-#  warn "LF: $local_file ", "D: ", Dumper($self);
+  #  warn "LF: $local_file ", "D: ", Dumper($self);
 
 
   if ($r = $ftp->get($self->GetCommon('RemoteFile'), $local_file)) {
-      return $r;
+    return $r;
   } else { 
     warn sprintf 'download of %s to %s failed',
-	  $self->GetCommon('RemoteFile'), $self->GetCommon('LocalFile');
+	$self->GetCommon('RemoteFile'), $self->GetCommon('LocalFile');
     warn 
 	'here are the settings in your Net::FTP::Common object: %s',
-	Dumper($self);
+	    Dumper($self);
     return undef;
-}
+  }
   
 
 }
@@ -649,6 +661,7 @@ example:
  my @dir =qw (/tmp /pub /gnu);
  map { @{$dir{$_}} = $ftp->ls(RemoteDir => $_ ) } @dir;
 
+
 =head2 %retval = $ez->dir (%override)
 
 B<this function returns a hash NOT an array>
@@ -746,6 +759,15 @@ Here is the results of the example from the the test suite (t/dir.t):
                        'perm' => 'drwxr-xr-x'
                      },
 
+=head2 $ez->delete (%override)
+
+This function logins into the remote machine, changes to C<RemoteDir> and then 
+issues C<$ftp->delete> on C<RemoteFile>
+
+In the C<samples/delete-file> directory of the distribution 
+exists files called 
+C<upload.pl> and C<download.pl> which together with C<Login.pm> will log into 
+a system and upload or delete the C<upfile>
 
 =head2 $ez->mkdir (%override)
 
