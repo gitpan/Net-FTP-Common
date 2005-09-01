@@ -36,13 +36,13 @@ ok($retval);
 #
 # Test 2
 #
-my $retval = $ez->get(LocalDir => 't/dldir');
+$retval = $ez->get(LocalDir => 't/dldir');
 ok($retval);
 
 #
 # Test 3
 #
 $ez->Common(LocalFile => '');
-my $retval = $ez->get(LocalDir => 't/dldir');
+$retval = $ez->get(LocalDir => 't/dldir');
 ok($retval);
 

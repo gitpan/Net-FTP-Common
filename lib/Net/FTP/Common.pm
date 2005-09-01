@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2f';
+$VERSION = '5.2g';
 
 # Preloaded methods go here.
 
@@ -24,7 +24,7 @@ sub new {
     (
      Host => 'ftp.microsoft.com',
      RemoteDir  => '/pub',
-     LocalDir  => '.',   # setup something for $ez->get
+#     LocalDir  => '.',   # setup something for $ez->get
      Type => 'I'
     );
 
@@ -46,6 +46,9 @@ sub new {
       lstat DUP; # kill used only once error
       open STDERR, ">&DUP";
   }
+
+  warn "Net::FTP::Common::VERSION = ", $Net::FTP::Common::VERSION  
+      if $self->{Debug} ;
 
 
   bless $new_self, $pkg;
@@ -316,6 +319,10 @@ sub prep {
 # So instead:
   my $ftp = $self->login ;
 
+  
+  $self->Common(LocalDir => '.') unless
+      $self->GetCommon('LocalDir') ;
+
   if ($self->{Common}->{RemoteDir}) {
       $ftp->cwd($self->GetCommon('RemoteDir'))
   } else {
@@ -390,7 +397,7 @@ sub send {
 
   my $ftp = $self->prep(%cfg);
 
-#  warn "send_self", Dumper($self);
+  #  warn "send_self", Dumper($self);
 
   my %fa = $self->file_attr;
 
@@ -399,13 +406,14 @@ sub send {
       return;
   }
 
-#  warn "send_fa: ", Dumper(\%fa);
+  warn "send_fa: ", Dumper(\%fa) if $self->{Debug} ;
+
 
   my $lf = sprintf "%s/%s", $fa{LocalDir}, $fa{LocalFile};
   my $RF = $fa{RemoteFile} ? $fa{RemoteFile} : $fa{LocalFile};
   my $rf = sprintf "%s/%s", $fa{RemoteDir}, $RF;
 
-#  warn "[upload $lf as $rf]";
+  warn "[upload $lf as $rf]" if $self->{Debug} ;
 
   $ftp->put($lf, $RF) or 
       confess sprintf "upload of %s to %s failed", $lf, $rf;
@@ -445,10 +453,11 @@ Net::FTP::Common - simplify common usages of Net::FTP
      #
 
 
-     LocalFile => 'delete.zip'       # setup something for $ez->get
-     Host => 'ftp.fcc.gov',          # overwrite ftp.microsoft.com default
-     RemoteDir  => '/',                    # automatic CD on remote machine to RemoteDir
-     Type => 'A'                     # overwrite I (binary) TYPE default
+     LocalFile => 'delete.zip'   # setup something for $ez->get
+     Host => 'ftp.fcc.gov',      # overwrite ftp.microsoft.com default
+     LocalDir   => '/tmp',
+     RemoteDir  => '/',          # automatic CD on remote machine to RemoteDir
+     Type => 'A'                 # overwrite I (binary) TYPE default
      );
 
   # NOTE WELL!!! one constructor arg is  passed by reference, the 
@@ -790,6 +799,11 @@ file in a directory listing. This means a regex, not C<eq> match.
 
 
 =head2 $ez->get(%override)
+
+IMPORTANT: C<LocalDir> must be set when you create a Net::FTP::Common object 
+(i.e, when you call Net::FTP::Common->new) or your Net::FTP::Common will
+default C<LocalDir> to "." and warn you about it.
+
 
 
 uses the C<RemoteFile>, C<LocalFile>, and C<LocalDir> options of object internal 
