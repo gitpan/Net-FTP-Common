@@ -8,7 +8,7 @@ BEGIN { plan tests => 4 }
 
 use TestConfig;
 
-# fodder to eliminiate 
+# fodder to eliminate
 # Name "TestConfig::netftp_cfg" used only once: possible typo 
 # red herring errors
 keys %TestConfig::common_cfg;
@@ -39,7 +39,7 @@ ok("@listing", qr/for_mirrors_only/);
 # Let's list the default dir on several hosts
 #
 $ez->Common(RemoteDir => '/pub');
-my @host_list = qw(ftp.kernel.org lnc.usc.edu);
+my @host_list = qw(ftp.kernel.org ftp.dartmouth.edu);
 my @a;
 for (@host_list) {
     warn $_;
@@ -51,18 +51,18 @@ my @host_listings = map { $ez->ls(Host => $_) } @host_list;
 
 warn "map_ver: ", Dumper(\@host_listings);
 
-ok("@host_listings", qr/winston/);
+ok("@host_listings", qr/majordomo-docs.+security/);
 
 
 #
 # Test 4
 # Let's list several directories on the same host
 #
-$ez->Common(Host => 'lnc.usc.edu');
-my @dir_list = qw(/pub/room-images /pub/dlr);
+$ez->Common(Host => 'ftp.dartmouth.edu');
+my @dir_list = qw(/pub/software /pub/floods);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
-warn "complete dir listing: @dir_listings";
+warn "complete dir listing: @dir_listings", Dumper \@dir_listings;
 ok("@dir_listings", qr/image/);
 
 

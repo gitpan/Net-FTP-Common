@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.2g';
+$VERSION = '5.30';
 
 # Preloaded methods go here.
 
@@ -196,7 +196,41 @@ sub dir {
     foreach (@{$dir})
         {
 	    # $_ =~ m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([A-Za-z0-9.-]*)#;
-	      $_ = m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([\w*\W*\s*\S*]*)#;
+	  #$_ = m#([a-z-]*)\s*([0-9]*)\s*([0-9a-zA-Z]*)\s*([0-9a-zA-Z]*)\s*([0-9]*)\s*([A-Za-z]*)\s*([0-9]*)\s*([0-9A-Za-z:]*)\s*([\w*\W*\s*\S*]*)#;
+
+=for comment
+
+drwxr-xr-x    8 0        0            4096 Sep 27  2003 .
+drwxr-xr-x    8 0        0            4096 Sep 27  2003 ..
+drwxr-xr-x    3 0        0            4096 Sep 11  2003 .afs
+-rw-r--r--    1 0        0             809 Sep 26  2003 .banner
+----r-xr-x    1 0        0               0 Mar  4  2002 .notar
+-rw-r--r--    1 0        0             796 Sep 27  2003 README
+
+=cut
+
+	  warn "input-line: $_" if $self->{Debug} ;
+
+	  $_ =~ m!^
+	    ([\-FlrwxsStTdD]{10})  # directory and permissions
+	    \s+
+	    (\d+)                  # inode
+	    \s+
+	    (\w+)                  # 2nd number
+	    \s+
+	    (\w+)                  # 3rd number
+	    \s+
+	    (\d+)                  # file/dir size
+	    \s+
+	    (\w{3,4})         # month
+	    \s+
+	    (\d{1,2})         # day
+	    \s+
+	    (\d{1,2}:\d{2}|\d{4})           # year
+	    \s+
+		(.+) # filename
+		  $!x;
+
 
         my $perm = $1;
         my $inode = $2;
@@ -208,6 +242,19 @@ sub dir {
         my $yearOrTime = $8;
         my $name = $9;
         my $linkTarget;
+
+	  warn "
+        my $perm = $1;
+        my $inode = $2;
+        my $owner = $3;
+        my $group = $4;
+        my $size = $5;
+        my $month = $6;
+        my $day = $7;
+        my $yearOrTime = $8;
+        my $name = $9;
+        my $linkTarget;
+" if $self->{Debug} ;
 
         if ( $' =~ m#\s*->\s*([A-Za-z0-9.-/]*)# )       # it's a symlink
                 { $linkTarget = $1; }
@@ -221,6 +268,8 @@ sub dir {
         $HoH{$name}{day} = $day;
         $HoH{$name}{yearOrTime} =  $yearOrTime;
         $HoH{$name}{linkTarget} = $linkTarget;
+
+	  warn "regexp-matches for ($name): ", Dumper(\$HoH{$name}) if $self->{Debug} ;
 
         }
   return(%HoH);
@@ -882,6 +931,8 @@ This is a harmless warning that I should fix some day.
 
 =over 4
 
+=item * replace parsing in dir() with lwp's File::Listing::line()
+
 =item * adding a warning about any keys passed that are not recognised 
 
 =item * support resumeable downloads
@@ -935,6 +986,20 @@ http://perlmonks.org/index.pl?node_id=317408
 
 T. M. Brannon <tbone@cpan.org>
 
-dir() method contributed by Kevin Evans (kevin _! a t (* i n s i g ht dot-com
+=head2 Acknowledgements
+
+=over 4
+
+=item * Kevin Evans
+
+dir() method contributed by Kevin Evans (kevin  a t  i n s i g h t dot-com)
+
+=item * Matthew Browning (matthewb on perlmonks)
+
+pointed out a problem with the dir() regexp which then led to me 
+plagiarizing a healthy section of File::Listing::line() from the LWP
+distro.
+
+=back
 
 =cut

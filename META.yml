@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Net-FTP-Common
-version:      5.2g
+version:      5.30
 version_from: lib/Net/FTP/Common.pm
 installdirs:  site
 requires:

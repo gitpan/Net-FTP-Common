@@ -17,8 +17,7 @@ keys %TestConfig::netftp_cfg;
 #warn Data::Dumper->Dump([\%TestConfig::common_cfg, \%TestConfig::netftp_cfg], [qw(common netftp)]);
 
 my $ez = Net::FTP::Common->new
-  (\%TestConfig::usc_cfg, %TestConfig::netftp_cfg);
-
+  (\%TestConfig::dart_cfg, %TestConfig::netftp_cfg);
 
 
 #
@@ -27,4 +26,4 @@ my $ez = Net::FTP::Common->new
 my %retval = $ez->dir;
 use Data::Dumper;
 warn "NEW_DIR ...", Dumper(\%retval);
-ok($retval{dlr}{perm}, 'drwxr-xr-x');
+ok($retval{win2000}{perm}, 'drwxrwsr-x');
