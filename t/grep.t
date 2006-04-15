@@ -26,12 +26,12 @@ my @retval = $ez->grep(Grep => qr/^REA/);
 #my @listing = $ez->ls;
 #die Dumper(\@listing);
 warn "GREP RETVAL: @retval";
-ok("@retval", "README README_ABOUT_BZ2_FILES");
+ok("@retval", "README README.CD-manufacture README.html README.mirrors.html README.mirrors.txt README.non-US README.pgp");
 
 
 #
 # Test 2
 #
-my $retval = $ez->exists(RemoteFile => 'dist');
+my $retval = $ez->exists(RemoteFile => 'dists');
 ok($retval);
 

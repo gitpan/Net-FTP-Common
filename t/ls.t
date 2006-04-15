@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use Test::More;
 
 use Net::FTP::Common;
 use Data::Dumper;
@@ -32,14 +32,14 @@ ok("@retval", qr/README/);
 #
 my @listing =   $ez->ls(RemoteDir => '/');
 warn "L: @listing";
-ok("@listing", qr/for_mirrors_only/);
+ok("@listing", qr/amd64/);
 
 #
 # Test 3
 # Let's list the default dir on several hosts
 #
 $ez->Common(RemoteDir => '/pub');
-my @host_list = qw(ftp.kernel.org ftp.dartmouth.edu);
+my @host_list = qw(ftp.x.org ftp.xemacs.org);
 my @a;
 for (@host_list) {
     warn $_;
@@ -51,18 +51,18 @@ my @host_listings = map { $ez->ls(Host => $_) } @host_list;
 
 warn "map_ver: ", Dumper(\@host_listings);
 
-ok("@host_listings", qr/majordomo-docs.+security/);
+like("@host_listings", qr/\bR\d\b/);
 
 
 #
 # Test 4
 # Let's list several directories on the same host
 #
-$ez->Common(Host => 'ftp.dartmouth.edu');
-my @dir_list = qw(/pub/software /pub/floods);
+$ez->Common(Host => 'ftp.wu-ftpd.org', RemoteDir => '/pub/support');
+my @dir_list = qw(/pub/support /pub/pgp-keys);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;
 
 warn "complete dir listing: @dir_listings", Dumper \@dir_listings;
-ok("@dir_listings", qr/image/);
+like("@dir_listings", qr/tar.gz/);
 
 
