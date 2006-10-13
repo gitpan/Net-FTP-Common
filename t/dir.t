@@ -26,4 +26,4 @@ my $ez = Net::FTP::Common->new
 my %retval = $ez->dir;
 use Data::Dumper;
 warn "NEW_DIR ...", Dumper(\%retval);
-ok($retval{dists}{perm}, 'drwxrwsr-x');
+ok($retval{dists}{perm}, 'drwxr-sr-x');

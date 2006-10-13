@@ -51,7 +51,7 @@ my @host_listings = map { $ez->ls(Host => $_) } @host_list;
 
 warn "map_ver: ", Dumper(\@host_listings);
 
-like("@host_listings", qr/\bR\d\b/);
+like("@host_listings", qr/X\d\dR\d\b/);
 
 
 #
