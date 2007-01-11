@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '5.32';
+$VERSION = '6.0';
 
 # Preloaded methods go here.
 
@@ -307,7 +307,7 @@ sub delete {
     my $rf  = $self->GetCommon('RemoteFile');
 
     
-    warn Dumper \%cfg;
+    warn Dumper \%cfg if $self->{Debug} ;
 
     $ftp->delete($rf);
 
@@ -989,6 +989,10 @@ T. M. Brannon <tbone@cpan.org>
 =head2 Acknowledgements
 
 =over 4
+
+=item * Eric M. Hillman
+
+he caught a debug message that was not tagged with the debug flag.
 
 =item * Kevin Evans
 

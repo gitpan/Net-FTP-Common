@@ -16,20 +16,26 @@ keys %TestConfig::netftp_cfg;
 
 #warn Data::Dumper->Dump([\%TestConfig::common_cfg, \%TestConfig::netftp_cfg], [qw(common netftp)]);
 
-my $ez = Net::FTP::Common->new
+our $ez;
+
+sub construct {
+ $ez = Net::FTP::Common->new
   (\%TestConfig::common_cfg, %TestConfig::netftp_cfg);
+}
 
 
 
 #
 # Test 1
 #
+construct;
 my @retval = sort $ez->ls;
 ok("@retval", qr/README/);
 
 #
 # Test 2
 #
+construct;
 my @listing =   $ez->ls(RemoteDir => '/');
 warn "L: @listing";
 ok("@listing", qr/amd64/);
@@ -38,6 +44,7 @@ ok("@listing", qr/amd64/);
 # Test 3
 # Let's list the default dir on several hosts
 #
+construct;
 $ez->Common(RemoteDir => '/pub');
 my @host_list = qw(ftp.x.org ftp.xemacs.org);
 my @a;
@@ -58,6 +65,7 @@ like("@host_listings", qr/X\d\dR\d\b/);
 # Test 4
 # Let's list several directories on the same host
 #
+construct;
 $ez->Common(Host => 'ftp.wu-ftpd.org', RemoteDir => '/pub/support');
 my @dir_list = qw(/pub/support /pub/pgp-keys);
 my @dir_listings = map { $ez->ls(RemoteDir => $_) } @dir_list;

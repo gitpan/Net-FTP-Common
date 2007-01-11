@@ -23,7 +23,8 @@ scripts/rsync-ftp/rsync-files-wanted.pl
 scripts/rsync-ftp/rsync-upload-files.pl
 t/0-login.t
 t/dir.t
-t/ls.t
+t/ls.t-disabled
+t/ls.t-disabled-README
 t/grep.t
 t/xfer.t
 t/dldir/README
