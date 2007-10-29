@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::FTP);
 
-$VERSION = '6.0';
+$VERSION = '6.1';
 
 # Preloaded methods go here.
 
