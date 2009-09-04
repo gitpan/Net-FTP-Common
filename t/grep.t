@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use Test::More;
 
 use Net::FTP::Common;
 use Data::Dumper;
@@ -26,7 +26,7 @@ my @retval = $ez->grep(Grep => qr/^REA/);
 #my @listing = $ez->ls;
 #die Dumper(\@listing);
 warn "GREP RETVAL: @retval";
-ok("@retval", "README README.CD-manufacture README.html README.mirrors.html README.mirrors.txt README.non-US README.pgp");
+like("@retval", qr/README.+README.CD-manufacture.+README.html.+README.mirrors.html.+README.mirrors.txt/);
 
 
 #

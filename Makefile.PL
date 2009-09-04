@@ -4,7 +4,11 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'Net::FTP::Common',
     'VERSION_FROM'	=> 'lib/Net/FTP/Common.pm', # finds $VERSION
-    'PREREQ_PM'		=> { Net::FTP => 1 }, # e.g., Module::Name => 1.1
+    'PREREQ_PM'		=> 
+    { 
+	Net::FTP => 1 ,
+      Test::More => 0,
+    }, 
 );
 
 sub MY::postamble { q{
