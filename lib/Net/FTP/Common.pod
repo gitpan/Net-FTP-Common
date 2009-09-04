@@ -145,7 +145,8 @@ arguments be supplied to any API function, then these changes are applied to
 the hash of the object's state and used by any future-called API function
 which might need them.
 
-Usage of this module is intended to be straightforward and stereotyped. The general steps to be used are:
+Usage of this module is intended to be straightforward and
+stereotyped. The general steps to be used are: 
 
 =over 4
 
@@ -157,18 +158,25 @@ This can be inlined within the script but oftentimes this will be stored in a mo
 
 =item * Use a Net::FTP::Common API function
 
-Note well that you NEVER have to login first. All API functions automatically log you in and change to the configured or
-specified directory. However, sometimes it is useful to see if you can actually login before
-attempting to do something else on an FTP site. This is the only time you will need the login() API method.
+Note well that you NEVER have to login first. All API functions
+automatically log you in and change to the configured or 
+specified directory. However, sometimes it is useful to see if you can
+actually login before 
+attempting to do something else on an FTP site. This is the only time
+you will need the login() API method. 
 
+=back
 
 =head1 METHODS
 
-=head2 C<$ez = Net::FTP::Common->new($net_ftp_common_hashref, %net_ftp_hash)>
+=head2  $ez = Net::FTP::Common->new($net_ftp_common_hashref, %net_ftp_hash)
 
-This method takes initialization information for Net::FTP::Common as well as Net::FTP and returns a new Net::FTP::Common object.
-Though the calling convention may seem a bit inconsistent, it is actually the best API to support re-use of legacy
-Net::FTP constructor calls. For example if you had a Net::FTP script which looked like this:
+This method takes initialization information for L<Net::FTP::Common> as
+well as L<Net::FTP> and returns a new Net::FTP::Common object. 
+Though the calling convention may seem a bit inconsistent, it is
+actually the best API to support re-use of legacy 
+Net::FTP constructor calls. For example if you had a Net::FTP script
+which looked like this: 
 
            use Net::FTP;
 
@@ -231,8 +239,8 @@ representing the contents of the remote directory and in the case of
 no files, returns an empty array instead of (like Net::FTP) returning
 a 1-element array containing the element undef.
 
-You may give this function any number of configuration arguments to over-ride the predefined configuration options. For 
-example:
+You may give this function any number of configuration arguments to
+over-ride the predefined configuration options. For example:
 
  my %dir;
  my @dir =qw (/tmp /pub /gnu);
@@ -249,13 +257,12 @@ type and then return a hash of with detailed description of directory
 contents. You may only call
 this routine and expect a hash back.
 
-You may give this function any number of configuration arguments to over-ride the predefined configuration options. 
+You may give this function any number of configuration arguments to
+over-ride the predefined configuration options.  
 
-Here is the results of the example from the the test suite (t/dir.t):
+Here is the results of the example from the the test suite F<t/dir.t>:
 
  my %retval = $ez->dir;
-
-# warn "NEW_DIR ...", Dumper(\%retval);
 
           'incoming' => {
                           'owner' => 'root',
@@ -269,28 +276,6 @@ Here is the results of the example from the the test suite (t/dir.t):
                           'perm' => 'drwxrwxrwx'
                         },
 
-          'test' => {
-                      'owner' => 'root',
-                      'month' => 'Jan',
-                      'linkTarget' => undef,
-                      'inode' => '1',
-                      'size' => '6',
-                      'group' => 'root',
-                      'yearOrTime' => '1999',
-                      'day' => '27',
-                      'perm' => '-rw-r--r--'
-                    },
-          'SEEMORE-database' => {
-                                  'owner' => 'mel',
-                                  'month' => 'Aug',
-                                  'linkTarget' => 'image',
-                                  'inode' => '1',
-                                  'size' => '14',
-                                  'group' => 'lnc',
-                                  'yearOrTime' => '20:35',
-                                  'day' => '15',
-                                  'perm' => 'lrwxrwxrwx'
-                                },
           'holt' => {
                       'owner' => 'holt',
                       'month' => 'Jun',
@@ -338,33 +323,34 @@ Here is the results of the example from the the test suite (t/dir.t):
 
 =head2 $ez->delete (%override)
 
-This function logins into the remote machine, changes to C<RemoteDir> and then 
-issues C<$ftp->delete> on C<RemoteFile>
+This method logins into the remote machine, changes to C<RemoteDir> and then 
+issues C<< $ftp->delete >> on C<RemoteFile>
 
-In the C<samples/delete-file> directory of the distribution 
+In the F<samples/delete-file> directory of the distribution 
 exists files called 
-C<upload.pl> and C<download.pl> which together with C<Login.pm> will log into 
-a system and upload or delete the C<upfile>
+F<upload.pl> and F<download.pl> which together with F<Login.pm> will log into 
+a system and upload or delete the F<upfile>
 
 =head2 $ez->mkdir (%override)
 
-Makes directories on remote FTP server. Will recurse if Recurse => 1 is
-in object's internal state of overridden at method call time. 
+Makes directories on remote FTP server. Will recurse if 
+C<< Recurse => 1 >> is
+in the object's internal state of overridden at method call time. 
 
 This function has no test case but a working example of its use is in 
-C<scripts/rsync.pl>. I use it to back up my stuff.
+F<scripts/rsync.pl>. I use it to back up my stuff.
 
 =head2 $ez->exists (%override)
 
+This method
 uses the C<RemoteFile> option of object internal state (or override) to check for a
 file in a directory listing. This means a C<eq>, not regex match.
 
 =head2 $ez->grep(%override)
 
 
-uses the C<Grep> option of object internal state (or override) to check for a
+This method uses the C<Grep> option of object internal state (or override) to check for a
 file in a directory listing. This means a regex, not C<eq> match.
-
 
 =head2 $ez->get(%override)
 
@@ -372,9 +358,7 @@ IMPORTANT: C<LocalDir> must be set when you create a Net::FTP::Common object
 (i.e, when you call Net::FTP::Common->new) or your Net::FTP::Common will
 default C<LocalDir> to "." and warn you about it.
 
-
-
-uses the C<RemoteFile>, C<LocalFile>, and C<LocalDir> options of object internal 
+This method uses the C<RemoteFile>, C<LocalFile>, and C<LocalDir> options of object internal 
 state 
 (or override) to download a file. No slashes need be appended to the end of
 C<LocalDir>. If C<LocalFile> and C<LocalDir> arent defined, then the file
@@ -385,18 +369,20 @@ All of the following have test cases and work:
 
   LocalDir    LocalFile  Action
   --------    ---------  ------
-  null        null       download to local dir using current dir
-  null        file       download to local dir using current dir but spec'ed file
-  dir         null       download to spec'ed dir using remote file name
+  NULL        NULL       download to local dir using current dir
+  NULL        file       download to local dir using current dir but spec'ed file
+  dir         NULL       download to spec'ed dir using remote file name
   dir         file       download to spec'ed dir using spec'ed file name
 
-null is any Perl non-true value... 0, '', undef.
+C<NULL> is any Perl non-true value - C<0>, C<''>, C<undef>.
 
 =head2 $ez->send(%override)
 
+Sends a file. This API call B<must> be used instead of C<put>.
+
 =head1 TRAPS FOR THE UNWARY
 
-=item *
+=head2 Beware of how to use grep
 
   @file = $ez->grep(Grep => '[A-M]*[.]txt');
   
@@ -404,35 +390,45 @@ is correct
 
   @file = $ez->grep('[A-M]*[.]txt');
 
-looks correct but is not because you did not name the argument as you are 
+looks correct but is B<not> because you did not name the argument as you are 
 supposed to.
 
-=item * 
 
-also note that the Net::FTP::Common login() function expects to be passed a
+Also note that the Net::FTP::Common login() function expects to be passed a
 hash, while the Net::FTP login() function expets to be passed a scalar.
 
 =head1 NOTES
 
-=over 4
+=head2 Sample usages
 
-=item * A good example of Net::FTP::Common usage comes with your download:
+A good example of Net::FTP::Common usage comes with your download:
 
-C<scripts/rsync.pl>
+F<scripts/rsync.pl>
 
 Although this script
-requires AppConfig, Net::FTP::Common in general does not... but go get
-AppConfig anyway, it rocks the house.
+requires L<AppConfig>, Net::FTP::Common in general does not... but go get
+L<AppConfig> anyway, it rocks the house.
 
-=item * A slide talk on Net::FTP::Common in HTML format is available at
+=head2 Talks
 
-  http://www.metaperl.com
+A slide talk on Net::FTP::Common in HTML format is available at
 
-=item * subscribe to the mailing list via
+L<http://www.metaperl.org>
 
-net-ftp-common-subscribe@yahoogroups.com
 
-=head1 * A harmless warning
+=head2 TODO
+
+Definite things to do:
+
+=over 4
+
+=item * replace parsing in dir() with L<LWP>'s C<File::Listing::line()>
+
+=item * adding a warning about any keys passed that are not recognised 
+
+=item * support resumeable downloads
+
+=item * A harmless warning
 
 When a Net::FTP::Common object is goes out of scope, the following warning 
 is thrown by Net::FTP: 
@@ -443,22 +439,7 @@ This is a harmless warning that I should fix some day.
 
 =back
 
-=head1 TODO
-
-=head2 Definite
-
-
-=over 4
-
-=item * replace parsing in dir() with lwp's File::Listing::line()
-
-=item * adding a warning about any keys passed that are not recognised 
-
-=item * support resumeable downloads
-
-=back
-
-=head2 Musings
+Musings:
 
 =over 4
 
@@ -470,29 +451,27 @@ This output is not standard. We did a fair job for most common Unixen, but
 if we aspire to the heights of an ange-ftp or other high-quality FTP
 client, we need something like they have in python:
 
-     http://freshmeat.net/redir/ftpparsemodule/20709/url_homepage/
+     L<http://freshmeat.net/redir/ftpparsemodule/20709/url_homepage/>
 
 
 =back
 
-=head1 Net::FTP FAQ
+=head2 Net::FTP FAQ
 
 Because I end up fielding so many Net::FTP questions, I feel it best to start a
 small FAQ.
 
-=head2 Trapping fatal exceptions
+=head3 Trapping fatal exceptions
 
-http://perlmonks.org/index.pl?node_id=317408
+L<http://perlmonks.org/index.pl?node_id=317408>
 
-=head1 SEE ALSO
+=head2 SEE ALSO
 
 =over 4
 
-=item 
+=item * L<http://lftp.yar.ru>
 
-=item * http://lftp.yar.ru
-
-=item * L<Net::FTP::Recursive|Net::FTP::Recursive>
+=item * L<Net::FTP::Recursive>
 
 =item * L<Net::FTP::blat>
 
@@ -500,32 +479,17 @@ http://perlmonks.org/index.pl?node_id=317408
 
 =back
 
-=head1 COPYRIGHT INFO
+=head1 SUPPORT
 
-Copyright: Copyright (c) 2002-2009 Terrence Brannon. 
+=head2 Mailing List
 
-=head2 License
+L<http://tech.groups.yahoo.com/group/net-ftp-common/>
 
-MIT License L<http://www.opensource.org/licenses/mit-license.php> -
+=head1 DEVELOPMENT
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-  
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+=head2 Repository
 
+L<http://github.com/metaperl/net-ftp-common/tree/master>
 
 =head1 AUTHOR
 
@@ -550,5 +514,33 @@ plagiarizing a healthy section of File::Listing::line() from the LWP
 distro.
 
 =back
+
+=head1 COPYRIGHT and LICENSE
+
+Copyright (c) 2002-2009 Terrence Brannon. 
+
+=head2 License
+
+MIT License L<http://www.opensource.org/licenses/mit-license.php> -
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+
+
 
 =cut
