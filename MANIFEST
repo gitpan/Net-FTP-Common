@@ -3,6 +3,7 @@ MANIFEST
 README
 TODO
 lib/Net/FTP/Common.pm
+lib/Net/FTP/Common.pod
 lib/TestConfig.pm
 Makefile.PL
 net-ftp-scripts/ping-servers-in-parallel.pl
